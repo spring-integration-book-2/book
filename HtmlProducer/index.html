@@ -5,7 +5,7 @@
 <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 1.5.6.1">
-<meta name="keywords" content="Asciidoctor, Pipelines, OSS, Publication">
+<meta name="keywords" content="Spring Integration, Spring Boot, Spring Framework, Enterprise Application Integration, EAI, Messaging">
 <title>Apress' The Definitive Guide to Spring Integration</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
@@ -589,13 +589,7 @@ table.CodeRay td.code>pre{padding:0}
 <h2 id="acknowledgements">Acknowledgements</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Thank you, dear community, for the inspiration.</p>
-</div>
-<div class="paragraph">
-<p>Thank you <a href="http://twitter.com/mojavelinux">Dan Allen (@mojavelinux)</a> and the <a href="https://asciidoctor.org">Asciidoctor</a> community for their tireless work on such an amazing technology.</p>
-</div>
-<div class="paragraph">
-<p>Thank you!</p>
+<p>I want to thank myself.</p>
 </div>
 <div class="sect2">
 <h3 id="_some_code">Some Code</h3>
@@ -604,24 +598,8 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.data.r2dbc</span>;
-
-<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Bean</span>;
-<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Configuration</span>;
-<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Import</span>;
-<span class="keyword">import</span> <span class="include">org.springframework.transaction.reactive.TransactionalOperator</span>;
-
-<span class="annotation">@Configuration</span>
-<span class="annotation">@Import</span>(CustomerDatabaseInitializer.class)
-<span class="directive">public</span> <span class="type">class</span> <span class="class">CommonAutoConfiguration</span> {
-
-        <span class="annotation">@Bean</span>
-        CustomerService defaultCustomerService(SimpleCustomerRepository cr,
-                        TransactionalOperator to, CustomerDatabaseInitializer dbi) {
-                <span class="keyword">return</span> <span class="keyword">new</span> CustomerService(cr, to, dbi);
-        }
-
-}</code></pre>
+<pre class="CodeRay highlight"><code data-lang="java"><span class="error">#</span> bootcamp
+A chapter introducing the basics</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -634,7 +612,7 @@ table.CodeRay td.code>pre{padding:0}
 <div id="footer">
 <div id="footer-text">
 Version 1.0<br>
-Last updated 2021-05-22 01:39:58 UTC
+Last updated 2021-05-22 01:56:59 UTC
 </div>
 </div>
 </body>
