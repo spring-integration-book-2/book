@@ -542,6 +542,22 @@ table.CodeRay td.code>pre{padding:0}
 <li><a href="#_next_steps">Next Steps</a></li>
 </ul>
 </li>
+<li><a href="#bootstrap">Bootcamp</a>
+<ul class="sectlevel2">
+<li><a href="#_a_big_ol_bag_o_beans">A Big ol' Bag o' Beans</a></li>
+<li><a href="#_the_code_customerservice_code">The <code>CustomerService</code></a></li>
+<li><a href="#_an_inflexible_implementation">An Inflexible Implementation</a></li>
+<li><a href="#_a_parameterized_implementation">A Parameterized Implementation</a></li>
+<li><a href="#_templates">Templates</a></li>
+<li><a href="#_a_context_for_your_application">A Context For Your Application</a></li>
+<li><a href="#_component_scanning">Component Scanning</a></li>
+<li><a href="#_declarative_container_services_with_code_enable_code_annotations">Declarative Container Services with <code>@Enable*</code> Annotations</a></li>
+<li><a href="#_a_bootiful_application">A "Bootiful" Application</a></li>
+<li><a href="#_but_what_if">But What If&#8230;&#8203;</a></li>
+<li><a href="#_deployment">Deployment</a></li>
+<li><a href="#_next_steps_2">Next Steps</a></li>
+</ul>
+</li>
 <li><a href="#acknowledgements">Acknowledgements</a>
 <ul class="sectlevel2">
 <li><a href="#_some_code">Some Code</a></li>
@@ -586,6 +602,1512 @@ table.CodeRay td.code>pre{padding:0}
 </div>
 </div>
 <div class="sect1">
+<h2 id="bootstrap">Bootcamp</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>To appreciate reactive programming in the broader ecosystem&#8217;s context, we&#8217;ll need to learn about Spring. What is Spring? What is dependency injection? Why do we use Spring Boot over (or in addition to?) Spring Framework? This chapter is a primer on the basics. We don&#8217;t talk about reactive programming in this chapter at all. If you already know the fundamentals of dependency injection, inversion-of-control, Java configuration, Spring application contexts, aspect-oriented programming (AOP),  and Spring Boot auto-configuration, skip this chapter!</p>
+</div>
+<div class="paragraph">
+<p>For the rest of us, we&#8217;re going to demonstrate some key concepts by building something. We&#8217;ll begin our journey, as usual, at my <em>second</em> <a href="http://start.Spring.io">favorite place on the internet, the Spring Initializr -  Start dot Spring dot IO</a>. Our goal is to build a trivial application. I specified <code>rsb</code> in the <code>Group</code> field and <code>bootstrap</code> in the <code>Artifact</code> field, though please feel free to select whatever you&#8217;d like. Select the following dependencies using the combo box text field on the bottom right of the page where it says <code>Search for dependencies</code>: <code>DevTools</code>,  <code>Web</code>, <code>H2</code>, <code>JDBC</code>, <code>Actuator</code> and <code>Lombok</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Devtools</code> lets us restart the application by running our IDE&#8217;s build command. No need to restart the entire JVM process. This lets us iterate quicker and see changes in the compiled code quicker. It also starts up a Livereload-protocol server. Some excellent browser plugins out there can listen for messages on this server and force the browser page to refresh, giving you a seamless what-you-see-is-what-you-get experience.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+If you&#8217;re using the Spring Tool Suite, you need only save your code, and you&#8217;ll see changes here. IntelliJ has no built-in notion of a "save," and so no hook off of which to hang this event. You&#8217;ll need to instead "build" the code. Go to <code>Build</code> &gt; <code>Build the project</code>. On a Mac, you could use Cmd + F9.
+</td>
+</tr>
+</table>
+</div>
+</blockquote>
+</div>
+<div class="paragraph">
+<p><code>Web</code> brings in everything you&#8217;d need today to build an application based on the Servlet specification and traditional Spring MVC. It brings in form validation, JSON and XML marshaling, WebSocket support, REST- and HTTP-controller support, etc. <code>H2</code> is an embedded SQL database that will lose its state on every restart. This is ideal for our first steps since we won&#8217;t have to install a database (or reset it).</p>
+</div>
+<div class="paragraph">
+<p><code>JDBC</code> brings in support, like the <code>JdbcTemplate</code>, for working with SQL-based databases.</p>
+</div>
+<div class="paragraph">
+<p><code>Lombok</code> is a compile-time annotation processor that synthesizes things like getters, setters, <code>toString()</code> methods, <code>equals()</code> methods, and so much more with but a few annotations. Most of these annotations are self-explanatory in describing what they contribute to the class on which they&#8217;re placed.</p>
+</div>
+<div class="paragraph">
+<p><code>Actuator</code> contributes HTTP endpoints, under <code>/actuator/\*</code>, that give visibility into the application&#8217;s state.</p>
+</div>
+<div class="paragraph">
+<p>There are some other choices if we&#8217;re so inclined. What version of the JVM do you want to target? (I&#8217;d recommend using the version corresponding to the latest OpenJDK build.) What language do you want? We&#8217;ll explore Kotlin later, but let&#8217;s use Java for now. Groovy is&#8230;&#8203; well, <em>groovy</em>! It&#8217;s a recommended choice, too. You can leave all the other values at their defaults for this simple application.</p>
+</div>
+<div class="paragraph">
+<p>For all that we <em>did</em> specify, we <em>didn&#8217;t</em> specify Spring itself. Or a logging library. Or any of a dozen sort of ceremonial framework-y bits that we&#8217;ll need to do the job. Those are implied in the other dependencies when using Spring Boot, so we don&#8217;t need to worry about them.</p>
+</div>
+<div class="paragraph">
+<p>Now, I hear you cry, "what about reactive?" Good point! We&#8217;ll get there, I promise, but nothing we&#8217;re introducing in this section is reactive simply because we need to have a baseline. These days, it&#8217;s fair game to assume you&#8217;ve some familiarity with things like JDBC (the Java Database Connectivity API) and the Servlet specification (there&#8217;s traditionally been very little to be done on the web tier in Java that doesn&#8217;t involve the Servlet specification).</p>
+</div>
+<div class="paragraph">
+<p>Scroll to the bottom and select <code>Generate Project</code>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/bootstrap/the-spring-initializr.png" alt="the Spring Initializr">
+</div>
+<div class="title">Figure 1. This shows us the selections on the Spring Initializr for a new, reactive application.</div>
+</div>
+<div class="paragraph">
+<p>This will generate and start downloading a new project in a <code>.zip</code> archive, in whatever folder your browser stores downloaded files. Unzip the archive, and you&#8217;ll see the following layout:</p>
+</div>
+<div class="listingblock">
+<div class="title">The generated project structure.</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java">Unresolved directive in chapters/bootstrap.adoc - include::includes/demo-tree.txt[the tree of the Maven project generated from the <span class="predefined-type">Spring</span> Initializr]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is a stock-standard Maven project. The only thing that might not be familiar is the <a href="https://github.com/takari/maven-wrapper">Maven wrapper</a> - those files starting with <code>mvnw</code>. The Maven wrapper provides shell scripts, for different operating systems, that download the Apache Maven distribution required to run this project&#8217;s build. This is particularly handy when you want to get the build to run as you&#8217;d expect it to run in a continuous integration environment. If you&#8217;re on a UNIX-like environment (macOS, any Linux flavor), you will run <code>mvnw</code>. On Windows, you would run <code>mvnw.cmd</code>.</p>
+</div>
+<div class="listingblock">
+<div class="title">Your Maven build <code>pom.xml</code> should look something like this:</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="preprocessor">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="tag">&lt;project</span> <span class="attribute-name">xmlns</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">http://maven.apache.org/POM/4.0.0</span><span class="delimiter">&quot;</span></span>
+         <span class="attribute-name">xmlns:xsi</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">http://www.w3.org/2001/XMLSchema-instance</span><span class="delimiter">&quot;</span></span>
+         <span class="attribute-name">xsi:schemaLocation</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+    <span class="tag">&lt;modelVersion&gt;</span>4.0.0<span class="tag">&lt;/modelVersion&gt;</span>
+
+    <span class="tag">&lt;groupId&gt;</span>rsb<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>bootstrap<span class="tag">&lt;/artifactId&gt;</span>
+    <span class="tag">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="tag">&lt;/version&gt;</span>
+    <span class="tag">&lt;packaging&gt;</span>jar<span class="tag">&lt;/packaging&gt;</span>
+
+    <span class="tag">&lt;name&gt;</span>bootstrap<span class="tag">&lt;/name&gt;</span>
+    <span class="tag">&lt;description&gt;</span>Demo project for Spring Boot<span class="tag">&lt;/description&gt;</span>
+
+    <span class="tag">&lt;parent&gt;</span>
+        <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+        <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;version&gt;</span>2.1.0.RELEASE<span class="tag">&lt;/version&gt;</span>
+        <span class="tag">&lt;relativePath</span><span class="tag">/&gt;</span> <span class="comment">&lt;!-- lookup parent from repository --&gt;</span>
+    <span class="tag">&lt;/parent&gt;</span>
+
+    <span class="tag">&lt;properties&gt;</span>
+        <span class="tag">&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class="tag">&lt;/project.build.sourceEncoding&gt;</span>
+        <span class="tag">&lt;project.reporting.outputEncoding&gt;</span>UTF-8
+        <span class="tag">&lt;/project.reporting.outputEncoding&gt;</span>
+        <span class="tag">&lt;java.version&gt;</span>1.8<span class="tag">&lt;/java.version&gt;</span>
+    <span class="tag">&lt;/properties&gt;</span>
+
+    <span class="tag">&lt;dependencies&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-web<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-jdbc<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-devtools<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>runtime<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>com.h2database<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>h2<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>runtime<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.projectlombok<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>lombok<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;optional&gt;</span>true<span class="tag">&lt;/optional&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>test<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+    <span class="tag">&lt;/dependencies&gt;</span>
+
+    <span class="tag">&lt;build&gt;</span>
+        <span class="tag">&lt;plugins&gt;</span>
+            <span class="tag">&lt;plugin&gt;</span>
+                <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+                <span class="tag">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;/plugin&gt;</span>
+        <span class="tag">&lt;/plugins&gt;</span>
+    <span class="tag">&lt;/build&gt;</span>
+
+
+<span class="tag">&lt;/project&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Our Maven build file, <code>pom.xml</code>, is pretty plain. Each checkbox selected on the Spring Initializr is represented as a dependency in the <code>pom.xml</code> build file. Most of them will have the <code>groupId</code> <code>org.springframework.boot</code>. We selected <code>Web</code>, and that corresponds to a dependency for building web applications with <code>artifactId</code>   <code>spring-boot-starter-web</code>, for example. That explains where at least three of our dependencies came from. But that doesn&#8217;t explain all of them. Testing is important, and we&#8217;re in the future, and in the future, everybody tests. (Right!!&#8230;&#8203;?) You&#8217;ll see at least <code>spring-boot-starter-test</code> among the dependencies added to your Maven build. The Spring Initializr often adds other testing libraries where appropriate based on the libraries you&#8217;ve added. There&#8217;s no "opt-in" for it. The Spring Initializr generates new projects with test dependencies automatically. (You&#8217;re welcome!)</p>
+</div>
+<div class="paragraph">
+<p>There&#8217;s also an empty property file, <code>src/main/resources/application.properties</code>. Later, we&#8217;ll see that we can specify properties to configure the application. Spring can read both <code>.properties</code> files and <code>.yaml</code> files.</p>
+</div>
+<div class="paragraph">
+<p>This is a stock-standard Spring Boot application with a <code>public static void main(String[] args)</code> entry-point class, <code>BootstrapApplication.java</code>. It is an empty class with a <code>main</code> method and an annotation, and it is <em>glorious</em>! While I&#8217;d love to stay here in the land of little, to jump right into bombastic Spring Boot, this wouldn&#8217;t be much of a <em>bootstrap</em> lesson without some background! So, delete <code>BootstrapApplication.java</code>. We&#8217;ll get there. But first, some basics.</p>
+</div>
+<div class="sect2">
+<h3 id="_a_big_ol_bag_o_beans">A Big ol' Bag o' Beans</h3>
+<div class="paragraph">
+<p>Spring Framework, the first project to bear the Spring moniker, is at its core a dependency injection framework. Dependency injection frameworks are simple things with very profound possibilities. The idea is simple: applications change a lot. Decoupling, broadly, helps to reduce the cost of changing our application code and system architecture. So we write code in such a way that it is ignorant of where dependencies - collaborating objects - originate.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_the_code_customerservice_code">The <code>CustomerService</code></h3>
+<div class="paragraph">
+<p>Suppose we&#8217;ve written an interface, <code>CustomerService</code>, for which we need to provide an implementation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap</span>;
+
+<span class="keyword">import</span> <span class="include">java.util.Collection</span>;
+
+<span class="directive">public</span> <span class="type">interface</span> <span class="class">CustomerService</span> {
+
+        <span class="predefined-type">Collection</span>&lt;Customer&gt; save(<span class="predefined-type">String</span>... names);
+
+        Customer findById(<span class="predefined-type">Long</span> id);
+
+        <span class="predefined-type">Collection</span>&lt;Customer&gt; findAll();
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The work of the <code>CustomerService</code> implementation itself isn&#8217;t so interesting as how it&#8217;s ultimately wired together. The wiring of the implementation - which objects are used to satisfy its dependencies - has an impact on how easy it is to change the implementation later on. This cost grows as you add more types to a system. The long tail of software project costs is in maintenance, so it is <em>always</em> cheaper to write maintainable code upfront.</p>
+</div>
+<div class="paragraph">
+<p>The <code>JdbcTemplate</code>, in Spring&#8217;s core JDBC support, is for many the first thing in the grab bag of utilities that led people to use Spring. It&#8217;s been around for most of Spring&#8217;s life. It supports common JDBC operations as expressive one-liners, alleviating most boilerplate (creating and destroying sessions or transactions, mapping results to objects, parameter binding, etc.) involved in working with JDBC.</p>
+</div>
+<div class="paragraph">
+<p>To keep things simple and distracting discussions around object-relational mappers (ORMs) and the like  - a paradigm well supported in Spring itself one way or another - we&#8217;ll stick to the <code>JdbcTemplate</code> in our implementations. Let&#8217;s look at a base implementation, <code>BaseCustomerService</code>, that requires a <code>DataSource</code> to do its work and instantiate a new <code>JdbcTemplate</code> instance.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.core.JdbcTemplate</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.core.RowMapper</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.support.GeneratedKeyHolder</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.support.KeyHolder</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.util.Assert</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+<span class="keyword">import</span> <span class="include">java.sql.PreparedStatement</span>;
+<span class="keyword">import</span> <span class="include">java.sql.Statement</span>;
+<span class="keyword">import</span> <span class="include">java.util.ArrayList</span>;
+<span class="keyword">import</span> <span class="include">java.util.Collection</span>;
+<span class="keyword">import</span> <span class="include">java.util.List</span>;
+<span class="keyword">import</span> <span class="include">java.util.Objects</span>;
+
+<i class="conum" data-value="1"></i><b>(1)</b>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">BaseCustomerService</span> <span class="directive">implements</span> CustomerService {
+
+        <span class="directive">private</span> <span class="directive">final</span> <span class="predefined-type">RowMapper</span>&lt;Customer&gt; rowMapper = (rs,
+                        i) -&gt; <span class="keyword">new</span> Customer(rs.getLong(<span class="string"><span class="delimiter">&quot;</span><span class="content">id</span><span class="delimiter">&quot;</span></span>), rs.getString(<span class="string"><span class="delimiter">&quot;</span><span class="content">NAME</span><span class="delimiter">&quot;</span></span>));
+
+        <i class="conum" data-value="2"></i><b>(2)</b>
+        <span class="directive">private</span> <span class="directive">final</span> JdbcTemplate jdbcTemplate;
+
+        <i class="conum" data-value="3"></i><b>(3)</b>
+        <span class="directive">protected</span> BaseCustomerService(<span class="predefined-type">DataSource</span> ds) {
+                <span class="local-variable">this</span>.jdbcTemplate = <span class="keyword">new</span> JdbcTemplate(ds);
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">Collection</span>&lt;Customer&gt; save(<span class="predefined-type">String</span>... names) {
+
+                <span class="predefined-type">List</span>&lt;Customer&gt; customerList = <span class="keyword">new</span> <span class="predefined-type">ArrayList</span>&lt;&gt;();
+                <span class="keyword">for</span> (<span class="predefined-type">String</span> name : names) {
+                        KeyHolder keyHolder = <span class="keyword">new</span> GeneratedKeyHolder();
+                        <span class="local-variable">this</span>.jdbcTemplate.update(connection -&gt; {
+                                <span class="predefined-type">PreparedStatement</span> ps = connection.prepareStatement(
+                                                <span class="string"><span class="delimiter">&quot;</span><span class="content">insert into CUSTOMERS (name) values(?)</span><span class="delimiter">&quot;</span></span>,
+                                                <span class="predefined-type">Statement</span>.RETURN_GENERATED_KEYS);
+                                ps.setString(<span class="integer">1</span>, name);
+                                <span class="keyword">return</span> ps;
+                        }, keyHolder);
+                        <span class="predefined-type">Long</span> keyHolderKey = Objects.requireNonNull(keyHolder.getKey()).longValue();
+                        Customer customer = <span class="local-variable">this</span>.findById(keyHolderKey);
+                        Assert.notNull(name, <span class="string"><span class="delimiter">&quot;</span><span class="content">the name given must not be null</span><span class="delimiter">&quot;</span></span>);
+                        customerList.add(customer);
+                }
+                <span class="keyword">return</span> customerList;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> Customer findById(<span class="predefined-type">Long</span> id) {
+                <span class="predefined-type">String</span> sql = <span class="string"><span class="delimiter">&quot;</span><span class="content">select * from CUSTOMERS where id = ?</span><span class="delimiter">&quot;</span></span>;
+                <span class="keyword">return</span> <span class="local-variable">this</span>.jdbcTemplate.queryForObject(sql, <span class="local-variable">this</span>.rowMapper, id);
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">Collection</span>&lt;Customer&gt; findAll() {
+                <span class="keyword">return</span> <span class="local-variable">this</span>.jdbcTemplate.query(<span class="string"><span class="delimiter">&quot;</span><span class="content">select * from CUSTOMERS</span><span class="delimiter">&quot;</span></span>, rowMapper);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This is a public class because we&#8217;ll have several different implementations, in different packages, in this chapter. Normally you wouldn&#8217;t have multiple implementations in different packages, and you should strive to assign a type the least visible modifier. A great majority of my code is package-private (no modifier at all).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The <code>JdbcTemplate</code> reference to talk to our <code>DataSource</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>For this implementation to do its work, it needs a <code>DataSource</code></td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_an_inflexible_implementation">An Inflexible Implementation</h3>
+<div class="paragraph">
+<p>The first cut at that implementation might depend on a <code>java.sql.DataSource</code> instance that allows it to talk to an RDBMS. It needs that object to be able to transact with the database, the store of record. This database is sure to change locations depending on the environment. It would therefore be a mistake to hard code credentials for the development database in the Java code. More broadly, it would be a mistake to bury the creation of the <code>DataSource</code> object in the <code>CustomerService</code> implementation itself. It&#8217;s a terrible idea for a whole host of reasons, not least because of its bad security practice. It&#8217;s also a bad idea because it couples the code to the data source running on the local machine. I can&#8217;t switch out the URL to which my database driver should connect.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+It&#8217;s a seriously bad code smell if your development database, testing, and integration testing database, and production database are all the same database instance!
+</td>
+</tr>
+</table>
+</div>
+</blockquote>
+</div>
+<div class="listingblock">
+<div class="title">A naive implementation of <code>CustomerService.java</code> - <em>don&#8217;t</em> do this!</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.hardcoded</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.BaseCustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.DataSourceUtils</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<span class="type">class</span> <span class="class">DevelopmentOnlyCustomerService</span> <span class="directive">extends</span> BaseCustomerService {
+
+        DevelopmentOnlyCustomerService() {
+                <span class="local-variable">super</span>(buildDataSource());
+        }
+
+        <span class="directive">private</span> <span class="directive">static</span> <span class="predefined-type">DataSource</span> buildDataSource() { <i class="conum" data-value="1"></i><b>(1)</b>
+                <span class="predefined-type">DataSource</span> dataSource = <span class="keyword">new</span> EmbeddedDatabaseBuilder()
+                                .setType(EmbeddedDatabaseType.H2).build();
+                <span class="keyword">return</span> DataSourceUtils.initializeDdl(dataSource);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This is brittle. It hardcodes the creation recipe for the <code>DataSource</code>, here using an embedded H2 in-memory SQL database, in the <code>CustomerService</code> implementation itself.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The biggest pity is that this implementation doesn&#8217;t do anything except pass in the hardcoded <code>DataSource</code> to the base implementation&#8217;s super constructor. The <code>BaseCustomerService</code> is parameterized. It preserves optionality. This subclass almost goes out of its way to remove that optionality by hardcoding this <code>DataSource</code>. What a waste. The <code>DataSource</code> <em>needs</em> to be created <em>somewhere</em>, but hopefully, we can agree it shouldn&#8217;t be implemented. The <code>DataSource</code> represents a live connection to a network service whose location may change as we promote the application from one environment (development, QA, staging, etc.) to another. In this silly example, we&#8217;re using an in-memory and embedded SQL database, but that&#8217;s not going to the be the common case; you&#8217;ll typically have a <code>DataSource</code> requiring environment-specific URIs, locators, credentials, etc.</p>
+</div>
+<div class="paragraph">
+<p>The <code>DataSource</code> requires some initialization before any consumers can use it. This example collocates that creation and initialization logic in the <code>CustomerService</code> implementation itself. If you&#8217;re curious, here&#8217;s the initialization logic itself. We&#8217;ll use this method - <code>DataSourceUtils#initializeDdl(DataSource)</code> - in subsequent examples.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.core.io.ClassPathResource</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.init.DatabasePopulatorUtils</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.init.ResourceDatabasePopulator</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<span class="directive">public</span> <span class="directive">abstract</span> <span class="type">class</span> <span class="class">DataSourceUtils</span> {
+
+        <span class="directive">public</span> <span class="directive">static</span> <span class="predefined-type">DataSource</span> initializeDdl(<span class="predefined-type">DataSource</span> dataSource) {
+                <i class="conum" data-value="1"></i><b>(1)</b>
+                ResourceDatabasePopulator populator = <span class="keyword">new</span> ResourceDatabasePopulator(
+                                <span class="keyword">new</span> ClassPathResource(<span class="string"><span class="delimiter">&quot;</span><span class="content">/schema.sql</span><span class="delimiter">&quot;</span></span>)); <i class="conum" data-value="2"></i><b>(2)</b>
+                DatabasePopulatorUtils.execute(populator, dataSource);
+                <span class="keyword">return</span> dataSource;
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the <code>ResourceDatabasePopulator</code> comes from the Spring Framework. It supports executing SQL statements against a <code>DataSource</code> given one or more SQL files. It even has options around whether to fail the initialization if, for example, a database table already exists when trying to run a <code>CREATE TABLE</code> operation or whether to continue.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Spring provides an abstraction, <code>Resource</code>, that represents some sort of resource with which we might want to perform input and output. The <code>ClassPathResource</code> represents resources found in the classpath of an application.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s an example demonstrating how we might wire up such an implementation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.hardcoded</span>;
+
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Demo</span>;
+
+<span class="directive">public</span> <span class="type">class</span> <span class="class">Application</span> {
+
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> main(<span class="predefined-type">String</span><span class="type">[]</span> args) {
+                DevelopmentOnlyCustomerService customerService = <span class="keyword">new</span> DevelopmentOnlyCustomerService();
+                Demo.workWithCustomerService(Application.class, customerService);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We exercise the resulting implementation with <code>Demo#workWithCustomerService(CustomerService)</code>. We&#8217;ll use this method in subsequent examples, so let&#8217;s look at it.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap</span>;
+
+<span class="keyword">import</span> <span class="include">lombok.extern.log4j.Log4j2</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.util.Assert</span>;
+
+<span class="keyword">import</span> <span class="include">java.util.stream.Stream</span>;
+
+<span class="annotation">@Log4j2</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">Demo</span> {
+
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> workWithCustomerService(<span class="predefined-type">Class</span>&lt;?&gt; label,
+                        CustomerService customerService) {
+                <i class="conum" data-value="1"></i><b>(1)</b>
+                log.info(<span class="string"><span class="delimiter">&quot;</span><span class="content">====================================</span><span class="delimiter">&quot;</span></span>);
+                log.info(label.getName());
+                log.info(<span class="string"><span class="delimiter">&quot;</span><span class="content">====================================</span><span class="delimiter">&quot;</span></span>);
+
+                <i class="conum" data-value="2"></i><b>(2)</b>
+                Stream.of(<span class="string"><span class="delimiter">&quot;</span><span class="content">A</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">B</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">C</span><span class="delimiter">&quot;</span></span>).map(customerService::save)
+                                .forEach(customer -&gt; log.info(<span class="string"><span class="delimiter">&quot;</span><span class="content">saved </span><span class="delimiter">&quot;</span></span> + customer.toString()));
+
+                <i class="conum" data-value="3"></i><b>(3)</b>
+                customerService.findAll().forEach(customer -&gt; {
+                        <span class="predefined-type">Long</span> customerId = customer.getId();
+                        <i class="conum" data-value="4"></i><b>(4)</b>
+                        Customer byId = customerService.findById(customerId);
+                        log.info(<span class="string"><span class="delimiter">&quot;</span><span class="content">found </span><span class="delimiter">&quot;</span></span> + byId.toString());
+                        Assert.notNull(byId, <span class="string"><span class="delimiter">&quot;</span><span class="content">the resulting customer should not be null</span><span class="delimiter">&quot;</span></span>);
+                        Assert.isTrue(byId.equals(customer),
+                                        <span class="string"><span class="delimiter">&quot;</span><span class="content">we should be able to query for </span><span class="delimiter">&quot;</span></span> + <span class="string"><span class="delimiter">&quot;</span><span class="content">this result</span><span class="delimiter">&quot;</span></span>);
+                });
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>announce generally what we&#8217;re doing</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>write some data to the database using our implementation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>find all records in the database</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>confirm that we can find each record by its ID</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>If that code looks suspiciously like a test&#8230;&#8203; it is! Each example even has a JUnit unit test that exercises the same code path. We&#8217;ll focus on how to stand up each example in the context of a <code>public static void main</code> application, and leave the tests. Suffice it to say, both the test and our demos exercise the same code.</p>
+</div>
+<div class="paragraph">
+<p><code>DataSource</code> instances are expensive and typically shared across services. It makes little sense to recreate them everywhere they&#8217;re used. Instead, let&#8217;s centralize their creation recipe and write our code so that it doesn&#8217;t care what reference it&#8217;s been given.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_a_parameterized_implementation">A Parameterized Implementation</h3>
+<div class="paragraph">
+<p>The simplest thing we can do to improve our example, and restore optionality, is to parameterize the <code>DataSource</code> through the constructor.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.basicdi</span>;
+
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.BaseCustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<span class="type">class</span> <span class="class">DataSourceCustomerService</span> <span class="directive">extends</span> BaseCustomerService {
+
+        <i class="conum" data-value="1"></i><b>(1)</b>
+        DataSourceCustomerService(<span class="predefined-type">DataSource</span> ds) {
+                <span class="local-variable">super</span>(ds);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Not much to it! It&#8217;s a class with a constructor that invokes the super constructor.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Here&#8217;s the refactored <code>main</code> method.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.basicdi</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.DataSourceUtils</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Demo</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<span class="directive">public</span> <span class="type">class</span> <span class="class">Application</span> {
+
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> main(<span class="predefined-type">String</span><span class="type">[]</span> args) {
+                <i class="conum" data-value="1"></i><b>(1)</b>
+                <span class="predefined-type">DataSource</span> dataSource = <span class="keyword">new</span> EmbeddedDatabaseBuilder()
+                                .setType(EmbeddedDatabaseType.H2).build();
+                <i class="conum" data-value="2"></i><b>(2)</b>
+                <span class="predefined-type">DataSource</span> initializedDataSource = DataSourceUtils.initializeDdl(dataSource);
+                CustomerService cs = <span class="keyword">new</span> DataSourceCustomerService(initializedDataSource);
+                Demo.workWithCustomerService(Application.class, cs);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Our <code>CustomerService</code> depends only on a pointer to a <code>DataSource</code>. So, if we decide to change this reference tomorrow, we can!</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Much better! Our <code>CustomerService</code> only cares that it has a fully-formed <code>DataSource</code> reference. It doesn&#8217;t need to know about initialization logic.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Much better. This implementation supports basic parameterization through generic base types. In this case, our code is ignorant of where the <code>DataSource</code> reference comes from. It could be a mock instance in a test or a production-grade connection pooled data source in a production environment.</p>
+</div>
+<div class="paragraph">
+<p>One thing you&#8217;ll note is that the code is a little naive with respect to transaction management in that it doesn&#8217;t handle transactions at all. Our base implementation is, let&#8217;s say, <em>optimisitic</em>! It&#8217;s all written in such a way that we assume nothing could go wrong. To be fair, the <code>findById</code> and <code>findAll</code> methods are queries. So, either the query returns the results we&#8217;ve asked for, or it doesn&#8217;t.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_templates">Templates</h3>
+<div class="paragraph">
+<p>You&#8217;re <em>probably</em> fine ignoring discussions of atomicity and transactions for those methods that read data since there&#8217;s only one query. Things get sticky when you look at the <code>save(String &#8230;&#8203; names)</code> method that loops through all of the input parameters and writes them to the database one by one. Sure, we probably should&#8217;ve used SQL batching, but this gives us the ability to have a thought experiment: what happens if there&#8217;s an exception in processing midway through processing all the <code>String &#8230;&#8203; names</code> arguments? By that point, we&#8217;ll have written one or more records to the database, but not all of them. Is that acceptable? In this case, it might be. Some are better than none, sometimes! It could be a more sophisticated example, though. You could be trying to write several related pieces of information to the database. Those related pieces of information would be inconsistent if they weren&#8217;t all written to the database simultaneously; if their integrity wasn&#8217;t maintained.</p>
+</div>
+<div class="paragraph">
+<p>Some middleware, including SQL datastores, support a concept of a transaction. You can enclose multiple correlated things into a unit of work and then commit all those correlated things simultaneously. Either everything in the transaction is written, or everything is rolled back, and the results are as-if you hadn&#8217;t written anything at all. It&#8217;s much easier to reason about the system this way. You don&#8217;t have to guess at what parts of the write succeeded and what didn&#8217;t.</p>
+</div>
+<div class="paragraph">
+<p>While we&#8217;re looking at the concept of a transaction in the context of a SQL-based datastore and the <code>JdbcTemplate</code>, they&#8217;re by no means unique to them. MongoDB supports transactions. So do many of your favorite message queues like RabbitMQ or those supporting the JMS specification. So does Neo4J. This basic workflow of working with a transaction is represented in Spring with the <code>PlatformTransactionManager</code>, of which <em>many</em> implementations support many different technologies. You can explicitly start some work, commit it or roll it back using a <code>PlatformTransactionManager</code>. This is simple enough, but it can be fairly tedious to write the try/catch handler that attempts the unit of work and commits it if there are no exceptions or rolls it back if there, even with a <code>PlatformTransactionManager</code>.</p>
+</div>
+<div class="paragraph">
+<p>So, Spring provides the <code>TransactionTemplate</code>, which reduces this to a one-liner. You provide a callback that gets executed in the context of an open transaction. If you throw any exceptions, those result in a rollback. Otherwise, the transaction is committed. Let&#8217;s revisit our example, this time incorporating transactions.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.templates</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.support.TransactionTemplate</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.BaseCustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Customer</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+<span class="keyword">import</span> <span class="include">java.util.Collection</span>;
+
+<span class="directive">public</span> <span class="type">class</span> <span class="class">TransactionTemplateCustomerService</span> <span class="directive">extends</span> BaseCustomerService {
+
+        <span class="directive">private</span> <span class="directive">final</span> TransactionTemplate transactionTemplate; <i class="conum" data-value="1"></i><b>(1)</b>
+
+        <span class="directive">public</span> TransactionTemplateCustomerService(<span class="predefined-type">DataSource</span> dataSource,
+                        TransactionTemplate tt) {
+                <span class="local-variable">super</span>(dataSource);
+                <span class="local-variable">this</span>.transactionTemplate = tt;
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">Collection</span>&lt;Customer&gt; save(<span class="predefined-type">String</span>... names) {
+                <span class="keyword">return</span> <span class="local-variable">this</span>.transactionTemplate.execute(s -&gt; <span class="local-variable">super</span>.save(names));
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> Customer findById(<span class="predefined-type">Long</span> id) {
+                <span class="keyword">return</span> <span class="local-variable">this</span>.transactionTemplate.execute(s -&gt; <span class="local-variable">super</span>.findById(id));
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">Collection</span>&lt;Customer&gt; findAll() {
+                <span class="keyword">return</span> <span class="local-variable">this</span>.transactionTemplate.execute(s -&gt; <span class="local-variable">super</span>.findAll());
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>this class depends on having a <code>TransactionTemplate</code> in addition to a <code>DataSource</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Much better! We only even bother to catch the exception so that we can return a sane result, not because we need to clean up the database. It isn&#8217;t so difficult to get this all working. Let&#8217;s look at an application that wires the requisite objects together.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.templates</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.DataSourceTransactionManager</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.PlatformTransactionManager</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.support.TransactionTemplate</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.DataSourceUtils</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Demo</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<span class="directive">public</span> <span class="type">class</span> <span class="class">Application</span> {
+
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> main(<span class="predefined-type">String</span> args<span class="type">[]</span>) {
+
+                <span class="predefined-type">DataSource</span> dataSource = <span class="keyword">new</span> EmbeddedDatabaseBuilder()
+                                .setType(EmbeddedDatabaseType.H2).build();
+                <span class="predefined-type">DataSource</span> initializedDataSource = DataSourceUtils.initializeDdl(dataSource); <i class="conum" data-value="1"></i><b>(1)</b>
+                PlatformTransactionManager dsTxManager = <span class="keyword">new</span> DataSourceTransactionManager(
+                                initializedDataSource);<i class="conum" data-value="2"></i><b>(2)</b>
+                TransactionTemplate tt = <span class="keyword">new</span> TransactionTemplate(dsTxManager); <i class="conum" data-value="3"></i><b>(3)</b>
+                <i class="conum" data-value="4"></i><b>(4)</b>
+                TransactionTemplateCustomerService customerService = <span class="keyword">new</span> TransactionTemplateCustomerService(
+                                initializedDataSource, tt);
+                Demo.workWithCustomerService(Application.class, customerService);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>initialize a <code>DataSource</code>, just as before&#8230;&#8203;</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>create an instance of <code>PlatformTransactionManager</code> called <code>DataSourceTransactionManager</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>wrap the <code>PlatformTransactionManager</code> in a <code>TransactionTemplate</code> object.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>&#8230;&#8203;and the rest is just as before.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Much better! We only even bother to catch the exception so that we can return a sane result, not because we need to clean up the database. The <code>TransactionTemplate</code> is just one of many <code>\*Template</code> objects - like the <code>JdbcTemplate</code> - that we&#8217;ve been using thus far that is designed to encapsulate boilerplate code like transaction management. A template method handles and hides otherwise boilerplate code and lets the user provide the little bit of variable behavior from one run to another. In this case, what we are doing with the database - queries, extraction, and transformation of results, etc. -  is unique and so we need to provide that logic. Still, everything else related to using the <code>PlatformTransactionManager</code> implementation is not.</p>
+</div>
+<div class="paragraph">
+<p>You will find that Spring provides a good many <code>\*Template</code> objects. The <code>JmsTemplate</code> makes working with JMS easier. The <code>AmqpTemplate</code> makes working with AMQP easier. The <code>MongoTemplate</code> and <code>ReactiveMongoTemplate</code> objects make working with MongoDB in a synchronous, blocking fashion and in an asynchronous, non-blocking fashion, respectively, easier. The <code>JdbcTemplate</code> makes working with JDBC easier. The <code>RedisTemplate</code> makes working with Redis easier. The <code>RestTemplate</code> makes creating HTTP client requests easier. There&#8217;s another dozen or so you&#8217;ll encounter in day-to-day work and a dozen more that are obscure but nice to have if you need them. One of my favorite, more obscure, examples is the <code>org.springframework.jca.cci.core.CciTemplate</code>, which makes working with the client-side of a Java Connector Architecture (JCA) connector through the Common Connector Interface (CCI) easier.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Will you ever need to use this? Statistically? No. Hopefully, never! It&#8217;s an API that you&#8217;ll need to integrate enterprise integration systems to your J2EE / Java EE application servers. We won&#8217;t be anywhere near one of those in this book!
+</td>
+</tr>
+</table>
+</div>
+</blockquote>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_a_context_for_your_application">A Context For Your Application</h3>
+<div class="paragraph">
+<p>This last example had more moving parts than any previous example. We had to create and configure four different objects to get to the point where we could do anything. Did I say "do"? I meant to exercise the API by passing the resulting, fully configured <code>CustomerService</code> as a method invocation parameter. We&#8217;re still a long way from providing value to a business outcome, though. To do that, we&#8217;d need to connect actual clients to this functionality. We&#8217;d need to deploy this somewhere. We&#8217;d need to create more such services, too. And maybe change out our in-memory embedded SQL databases for a real one whose data endures across restarts. We&#8217;re going to need to capture and componentize the recipes for these various objects. Right now, everything&#8217;s buried in our <code>main(String[] args)</code> method. We have to copy and paste the code into our tests to confirm that things work as expected.</p>
+</div>
+<div class="paragraph">
+<p>This isn&#8217;t going to scale. Let&#8217;s look at an example that uses Spring to describe the wiring of objects in your application. We&#8217;ll see that it supports the flexibility we&#8217;ve worked so hard to obtain, thus simplifying our production code and our test code. This won&#8217;t require a rewrite of the <code>CustomerService</code> - virtually everything is identical to before. It is only the wiring that changes.</p>
+</div>
+<div class="paragraph">
+<p>Spring is ultimately a big bag of beans. It manages the beans and their lifecycles, but we need to tell it what objects are involved. One way to do that is to define objects (called "beans"). In this example, we&#8217;ll define "beans" in our application class.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.context</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.context.ApplicationContext</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Bean</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Configuration</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Import</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.DataSourceTransactionManager</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.PlatformTransactionManager</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.support.TransactionTemplate</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.DataSourceConfiguration</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Demo</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.SpringUtils</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.templates.TransactionTemplateCustomerService</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<i class="conum" data-value="1"></i><b>(1)</b>
+<span class="annotation">@Configuration</span>
+<span class="annotation">@Import</span>(DataSourceConfiguration.class) <i class="conum" data-value="2"></i><b>(2)</b>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">Application</span> {
+
+        <i class="conum" data-value="3"></i><b>(3)</b>
+        <span class="annotation">@Bean</span>
+        PlatformTransactionManager transactionManager(<span class="predefined-type">DataSource</span> ds) {
+                <span class="keyword">return</span> <span class="keyword">new</span> DataSourceTransactionManager(ds);
+        }
+
+        <span class="annotation">@Bean</span>
+        TransactionTemplateCustomerService customerService(<span class="predefined-type">DataSource</span> ds,
+                        TransactionTemplate tt) {
+                <span class="keyword">return</span> <span class="keyword">new</span> TransactionTemplateCustomerService(ds, tt);
+        }
+
+        <span class="annotation">@Bean</span>
+        TransactionTemplate transactionTemplate(PlatformTransactionManager tm) {
+                <span class="keyword">return</span> <span class="keyword">new</span> TransactionTemplate(tm);
+        }
+
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> main(<span class="predefined-type">String</span> args<span class="type">[]</span>) {
+                <i class="conum" data-value="4"></i><b>(4)</b>
+                ApplicationContext ac = SpringUtils.run(Application.class, <span class="string"><span class="delimiter">&quot;</span><span class="content">prod</span><span class="delimiter">&quot;</span></span>);
+
+                <i class="conum" data-value="5"></i><b>(5)</b>
+                CustomerService cs = ac.getBean(CustomerService.class);
+                Demo.workWithCustomerService(Application.class, cs);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the <code>Application</code> class is <em>also</em> a <code>@Configuration</code> class. It is a class that has methods annotated with <code>@Bean</code> whose return values are objects to be stored and made available for other objects in the application context</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The definition of our <code>DataSource</code> changes depending on whether we&#8217;re running the application in a development context or production. We have stored those definitions in another configuration class, which we import here. We&#8217;ll review those definitions momentarily.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Each method in a <code>@Configuration</code>-annotated class annotated with <code>@Bean</code> is a <em>bean provider method</em>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>I&#8217;ve hidden the complexity of creating a Spring <code>ApplicationContext</code> in this method, <code>SpringUtils.run</code>. There are a half dozen interesting implementations of the <code>ApplicationContext</code> interface. Usually, we won&#8217;t need to care which and when we use what because the creation of that object in Spring Boot, which we&#8217;ll use later, is hidden from us. To arrive at a working instance of the Spring <code>ApplicationContext</code>, we need to furnish both the configuration class and a <em>profile</em>, a label, <code>prod</code>. We&#8217;ll come back to labels momentarily.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>The <code>ApplicationContext</code> is the heart of a  Spring application. It&#8217;s the thing that stores all our configured objects. We can ask it for references to any bean, by the beans class type (as shown here) or its bean name.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Those <code>@Bean</code> provider methods are important. This is how we define objects and their relationships for Spring. Spring starts up, invokes the methods, and stores the resulting objects to be made available for other objects that need those references as collaborating objects. When Spring provides a reference to the dependency, we say it has "injected" the dependency. If any other code anywhere in the application needs an object of the type (or types, if interfaces are expressed on the resulting type) returned from the method, they&#8217;ll be given a reference to the single instance returned from this method the first time it was invoked.</p>
+</div>
+<div class="paragraph">
+<p>If a bean needs a reference to another to do its work, it expresses that <em>dependency</em> as a parameter in the bean provider method. Spring will look up any beans of the appropriate definition, and it will provide them as parameters when it invokes our method.</p>
+</div>
+<div class="paragraph">
+<p>We can recreate the entire application by recreating the <code>ApplicationContext</code>.. In this first example, we&#8217;re using plain ol' Spring Framework. Nothing special about it. Let&#8217;s look at how we create our <code>ApplicationContext</code> instance, but keep in mind that we&#8217;ll not need this boilerplate code later.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.context.ConfigurableApplicationContext</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.AnnotationConfigApplicationContext</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.util.StringUtils</span>;
+
+<span class="directive">public</span> <span class="directive">abstract</span> <span class="type">class</span> <span class="class">SpringUtils</span> {
+
+        <span class="directive">public</span> <span class="directive">static</span> ConfigurableApplicationContext run(<span class="predefined-type">Class</span>&lt;?&gt; sources, <span class="predefined-type">String</span> profile) {
+                <i class="conum" data-value="1"></i><b>(1)</b>
+                AnnotationConfigApplicationContext applicationContext = <span class="keyword">new</span> AnnotationConfigApplicationContext();
+
+                <i class="conum" data-value="2"></i><b>(2)</b>
+                <span class="keyword">if</span> (StringUtils.hasText(profile)) {
+                        applicationContext.getEnvironment().setActiveProfiles(profile);
+                }
+
+                <i class="conum" data-value="3"></i><b>(3)</b>
+                applicationContext.register(sources);
+                applicationContext.refresh();
+
+                <i class="conum" data-value="4"></i><b>(4)</b>
+                applicationContext.start();
+                <span class="keyword">return</span> applicationContext;
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>we&#8217;re using an <code>ApplicationContext</code> instance that can handle annotation-centric configuration, also known as "Java configuration".</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>You can tell Spring to create, or not create, objects based on various conditions. One condition is, "does this bean have a profile associated with it?" A profile is a label, or a tag, attached to an object&#8217;s definition. We haven&#8217;t seen one yet, but we will. By setting an active profile, we&#8217;re saying: "create all objects that have no profile associated with them, <em>and</em> create all objects associated with the specific profiles that we make active."</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>In this case, we&#8217;re registering a configuration class. In other contexts, the "sources" might be other kinds of input artifacts.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>finally, we launch Spring, and it, in turn, goes about triggering the creation of all the objects contained therein.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s look at how the <code>DataSource</code> definitions are handled in a separate class, <code>DataSourceConfiguration</code>. I&#8217;ve extracted these definitions out into a separate class to more readily reuse their definition in subsequent examples. I want to centralize all the complexity of constructing the <code>DataSource</code> into a single place in the codebase. We&#8217;re going to take advantage of profiles to create two <code>DataSource</code> definitions. One that results in an in-memory H2 <code>DataSource</code>  and another configuration that produces a <code>DataSource</code> when given a driver class name, a username, a password, and a JDBC URL. These parameters are variable and may change from one developer&#8217;s machine to another and one environment to another.</p>
+</div>
+<div class="paragraph">
+<p>Spring has an <code>Environment</code> object that you can inject anywhere you want it, that acts like a dictionary for configuration values - just keys and values associated with those keys. Values may originate anywhere - property files, YAML files, environment variables, databases, etc. You can teach the <code>Environment</code> about new sources for configuration values by contributing an object of type <code>PropertySource</code> to the <code>Environment</code>. Spring has a convenient annotation, <code>@PropertySource</code>, that takes any configuration values from a file and adds them to the <code>Environment</code>. Once in the <code>Environment</code>, you can have those values injected into configuration parameters in your bean provider methods with the <code>@Value</code> annotation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap</span>;
+
+<span class="keyword">import</span> <span class="include">org.h2.Driver</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.beans.BeansException</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.beans.factory.annotation.Value</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.beans.factory.config.BeanPostProcessor</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Bean</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Configuration</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Profile</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.PropertySource</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.DriverManagerDataSource</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<span class="annotation">@Configuration</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">DataSourceConfiguration</span> {
+
+        <i class="conum" data-value="1"></i><b>(1)</b>
+        <span class="annotation">@Configuration</span>
+        <span class="annotation">@Profile</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">prod</span><span class="delimiter">&quot;</span></span>) <i class="conum" data-value="2"></i><b>(2)</b>
+        <span class="annotation">@PropertySource</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">application-prod.properties</span><span class="delimiter">&quot;</span></span>) <i class="conum" data-value="3"></i><b>(3)</b>
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">ProductionConfiguration</span> {
+
+                <span class="annotation">@Bean</span>
+                <span class="predefined-type">DataSource</span> productionDataSource(<span class="annotation">@Value</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">${spring.datasource.url}</span><span class="delimiter">&quot;</span></span>) <span class="predefined-type">String</span> url, <i class="conum" data-value="4"></i><b>(4)</b>
+                                <span class="annotation">@Value</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">${spring.datasource.username}</span><span class="delimiter">&quot;</span></span>) <span class="predefined-type">String</span> username,
+                                <span class="annotation">@Value</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">${spring.datasource.password}</span><span class="delimiter">&quot;</span></span>) <span class="predefined-type">String</span> password,
+                                <span class="annotation">@Value</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">${spring.datasource.driver-class-name}</span><span class="delimiter">&quot;</span></span>) <span class="predefined-type">Class</span>&lt;<span class="predefined-type">Driver</span>&gt; driverClass <i class="conum" data-value="5"></i><b>(5)</b>
+                ) {
+                        DriverManagerDataSource dataSource = <span class="keyword">new</span> DriverManagerDataSource(url,
+                                        username, password);
+                        dataSource.setDriverClassName(driverClass.getName());
+                        <span class="keyword">return</span> dataSource;
+                }
+
+        }
+
+        <span class="annotation">@Configuration</span>
+        <span class="annotation">@Profile</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">default</span><span class="delimiter">&quot;</span></span>) <i class="conum" data-value="6"></i><b>(6)</b>
+        <span class="annotation">@PropertySource</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">application-default.properties</span><span class="delimiter">&quot;</span></span>)
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">DevelopmentConfiguration</span> {
+
+                <span class="annotation">@Bean</span>
+                <span class="predefined-type">DataSource</span> developmentDataSource() {
+                        <span class="keyword">return</span> <span class="keyword">new</span> EmbeddedDatabaseBuilder().setType(EmbeddedDatabaseType.H2).build();
+                }
+
+        }
+
+        <span class="annotation">@Bean</span>
+        DataSourcePostProcessor dataSourcePostProcessor() {
+                <span class="keyword">return</span> <span class="keyword">new</span> DataSourcePostProcessor();
+        }
+
+        <i class="conum" data-value="7"></i><b>(7)</b>
+        <span class="directive">private</span> <span class="directive">static</span> <span class="type">class</span> <span class="class">DataSourcePostProcessor</span> <span class="directive">implements</span> BeanPostProcessor {
+
+                <span class="annotation">@Override</span>
+                <span class="directive">public</span> <span class="predefined-type">Object</span> postProcessAfterInitialization(<span class="predefined-type">Object</span> bean, <span class="predefined-type">String</span> beanName)
+                                <span class="directive">throws</span> BeansException {
+
+                        <span class="keyword">if</span> (bean <span class="keyword">instanceof</span> <span class="predefined-type">DataSource</span>) {
+                                DataSourceUtils.initializeDdl(<span class="predefined-type">DataSource</span>.class.cast(bean));
+                        }
+                        <span class="keyword">return</span> bean;
+                }
+
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@Configuration</code> classes can act as a container for other configuration classes. When we import the <code>DataSourceConfiguration</code> class, Spring also resolves any nested configuration classes.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This configuration class is only meant to be active when the <code>prod</code> profile is active.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Tell Spring that we want configuration values from the <code>application-prod.properties</code> property file, located at <code>src/main/resources/application-prod.properties</code>, to be loaded into the <code>Environment</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>inject values from the configuration file by their key using the <code>@Value</code> annotation</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Spring can convert string values in property files to more complex types, like <code>Class&lt;T&gt;</code> literals, because it delegates to another subsystem in Spring called the <code>ConversionService</code>. You can customize this object, too!</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="6"></i><b>6</b></td>
+<td>the <code>default</code> profile is a special profile. It is active <em>only</em> when no other profile is active. So, if you specifically activate the <code>prod</code> profile, then <code>default</code> won&#8217;t be active. If you don&#8217;t activate any profile, then <code>default</code> will kick in. Thus, all objects in this <code>default</code> profile will be contributed by default. Here, we contribute an in-memory H2 embedded SQL database.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="7"></i><b>7</b></td>
+<td>In previous examples, we used our initializer, <code>DataSourceUtils.initializeDdl</code>, to ensure that the <code>DataSource</code> had the required DDL run against it before it was put into service. Now, we have two places where we define a <code>DataSource</code>. We could simply duplicate that logic across both locations, but that violates the DRY (Don&#8217;t Repeat Yourself) principle. Instead, we will configure an object of type <code>BeanPostProcessor</code>. <code>BeanPostProcessor</code>  is a callback interface. It provides two (default) methods. Here, our class overrides <code>postProcessAfterInitialization</code> which is invoked for every object in the Spring application. We interrogate the type of the object, confirm it is a <code>DataSource</code> of some sort, and then initialize it. This way, it doesn&#8217;t matter how or where the <code>DataSource</code> is created. The <code>BeanPostProcessor</code> ensures it is properly initialized. Spring has other lifecycle events and associated callback interfaces that might be interesting that you&#8217;ll see from time to time. <code>BeanPostProcessor</code> is one of the more common.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>In the <code>Application</code> class, we explicitly pass in the profile, <code>prod</code>. This is not the only way to configure the profile, though. It&#8217;s a limiting approach, too. Consider that the profile, so specified, is hardcoded into the application logic. In a normal workflow, you would promote the application binary from the environment to another without recompiling to not risk inviting variables into the builds. So, you&#8217;d want some way to change the profile without recompilation. Spring supports a command-line argument, <code>--spring.profiles.active=prod</code>, when running <code>java</code> to start the application. You could also specify the property in your main class&#8217;s <code>main</code> method - say  <code>System.setProperty("spring.profiles.active", "prod")</code> right before the <code>SpringApplication.run</code> call. The <code>prod</code> profile consults properties in its property file, <code>application-prod.properties</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="properties">spring.datasource.url=jdbc:h2:mem:rsb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false
+spring.datasource.username=sa
+spring.datasource.password=
+spring.datasource.driver-class-name=org.h2.Driver</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Naturally, you could change any of these property values. If you were using PostgreSQL or MySQL or Oracle, or whatever, it&#8217;d be a simple matter to update these values accordingly.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_component_scanning">Component Scanning</h3>
+<div class="paragraph">
+<p>The configuration class approach has the advantage of being explicit; we need only to inspect the class to see every object in the application and its wiring. It&#8217;s also another artifact we need to evolve as we move forward in time, as we add new objects to the application. Each time we add a new service, we need to configure it in this configuration class. Spring supports a ton of different types of objects - components are the simplest of the hierarchy. It also supports controllers, services, repositories, and any of several other types of objects. For each object you add to a Spring application, you need to have a corresponding entry in the configuration class. Is that, in its way, a violation of DRY, as well?</p>
+</div>
+<div class="paragraph">
+<p>Spring can  <em>implicitly</em> learn the wiring of objects in the application graph if we let it perform component scanning when the application starts up. If we added the <code>@ComponentScan</code> annotation to our application, Spring would discover any objects in the current package, or beneath it, that had identifying marker - or "stereotype" - annotations. This would complement the use of Java configuration nicely. In this scenario, Spring&#8217;s component scanning would discover all Spring objects that we, the developer define, things like our services and HTTP controllers. At the same time, we&#8217;d leave things like the <code>DataSource</code> and the <code>TransactionTemplate</code> to the Java configuration. Put another way; if you have access to the source code and can annotate it with Spring annotations, then you might consider letting Spring discover that object through component scanning.</p>
+</div>
+<div class="paragraph">
+<p>When Spring finds such an annotated object, it&#8217;ll inspect the constructor(s). If it finds no constructor, it&#8217;ll instantiate an instance of the application using the default constructor. If it finds a single constructor with no arguments, it&#8217;ll instantiate that. Suppose it finds a constructor argument whose values may be satisfied by other objects in the Spring application (the same way that they might for our bean definition provider methods). In that case, Spring will provide those collaborating objects. If it finds multiple, ambiguous constructors, you can tell Spring which constructor to use by annotating that constructor with the <code>@Autowired</code> annotation to disambiguate it from other constructors.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s rework our application, ever so slightly, in the light of component scanning.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.scan</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.context.ConfigurableApplicationContext</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Bean</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.ComponentScan</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Configuration</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Import</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.DataSourceTransactionManager</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.PlatformTransactionManager</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.support.TransactionTemplate</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.DataSourceConfiguration</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Demo</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.SpringUtils</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<span class="annotation">@Configuration</span>
+<span class="annotation">@ComponentScan</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="annotation">@Import</span>(DataSourceConfiguration.class)
+<span class="directive">public</span> <span class="type">class</span> <span class="class">Application</span> {
+
+        <span class="annotation">@Bean</span>
+        PlatformTransactionManager transactionManager(<span class="predefined-type">DataSource</span> ds) {
+                <span class="keyword">return</span> <span class="keyword">new</span> DataSourceTransactionManager(ds);
+        }
+
+        <span class="annotation">@Bean</span>
+        TransactionTemplate transactionTemplate(PlatformTransactionManager tm) {
+                <span class="keyword">return</span> <span class="keyword">new</span> TransactionTemplate(tm);
+        }
+
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> main(<span class="predefined-type">String</span> args<span class="type">[]</span>) {
+                ConfigurableApplicationContext applicationContext = SpringUtils
+                                .run(Application.class, <span class="string"><span class="delimiter">&quot;</span><span class="content">prod</span><span class="delimiter">&quot;</span></span>);
+                CustomerService customerService = applicationContext
+                                .getBean(CustomerService.class);
+                Demo.workWithCustomerService(Application.class, customerService);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The only thing of note here is that we&#8217;ve enabled component scanning using the <code>@ComponentScan</code> annotation and that we don&#8217;t have a bean provider method for the <code>CustomerService</code> type since Spring will now automatically detect that type in the component scan.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>It will discover the <code>CustomerService</code> type in the component scan, <em>if</em>, that is, we annotate it to be discovered. Let&#8217;s create a new type that does nothing but host a stereotype annotation, <code>@Service</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.scan</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.stereotype.Service</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.support.TransactionTemplate</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.templates.TransactionTemplateCustomerService</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<i class="conum" data-value="1"></i><b>(1)</b>
+<span class="annotation">@Service</span>
+<span class="type">class</span> <span class="class">DiscoveredCustomerService</span> <span class="directive">extends</span> TransactionTemplateCustomerService {
+
+        <i class="conum" data-value="2"></i><b>(2)</b>
+        DiscoveredCustomerService(<span class="predefined-type">DataSource</span> dataSource, TransactionTemplate tt) {
+                <span class="local-variable">super</span>(dataSource, tt);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the <code>@Service</code> annotation is a stereotype annotation. This class exists in the same package as <code>Application.java</code>, only to allow us to annotate it so that it can be discovered. Most codebases will have much shallower hierarchies. The stereotype annotation will live on the class with the business logic&#8217;s implementation, not just a subclass of some other thing extracted into another package just for improvement as in this book!</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>the <code>Application</code> class defines instances of these types, so we know that Spring can satisfy these dependencies.</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_declarative_container_services_with_code_enable_code_annotations">Declarative Container Services with <code>@Enable*</code> Annotations</h3>
+<div class="paragraph">
+<p>We introduced Spring and added a class to support our configuration. We extricated the objects' wiring from the <code>main(String[])</code> method and into this new configuration class. Our code has more moving parts, not less. It&#8217;s not hard to see Spring could make things simpler - particularly when using component scanning - as we add even more objects to our application. The configuration, amortized over the cost of more objects in the application, is almost nothing at all. That&#8217;s a win in the near term but doesn&#8217;t apply to us right now. What can we do to simplify the code right now? Our service now uses the <code>TransactionTemplate</code> to manage transactions. We use the <code>TransactionTemplate</code> to demarcate transactional boundaries for our core functionality. For every method we add, we need to wrap the transaction demarcation logic in the same way. This cross-cutting concern - transaction demarcation - is one thing with which we&#8217;ll have to often contend, even though its a fairly straightforward requirement. It shouldn&#8217;t require constant code to support it, either. Let&#8217;s look at how we can simplify the code with declarative transaction demarcation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.enable</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.context.ConfigurableApplicationContext</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Bean</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.ComponentScan</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Configuration</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Import</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.jdbc.datasource.DataSourceTransactionManager</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.PlatformTransactionManager</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.annotation.EnableTransactionManagement</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.support.TransactionTemplate</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.DataSourceConfiguration</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Demo</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.SpringUtils</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.templates.TransactionTemplateCustomerService</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<span class="annotation">@Configuration</span>
+<span class="annotation">@EnableTransactionManagement</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="annotation">@ComponentScan</span>
+<span class="annotation">@Import</span>(DataSourceConfiguration.class)
+<span class="directive">public</span> <span class="type">class</span> <span class="class">Application</span> {
+
+        <span class="annotation">@Bean</span>
+        PlatformTransactionManager transactionManager(<span class="predefined-type">DataSource</span> ds) {
+                <span class="keyword">return</span> <span class="keyword">new</span> DataSourceTransactionManager(ds);
+        }
+
+        <span class="annotation">@Bean</span>
+        TransactionTemplate transactionTemplate(PlatformTransactionManager tm) {
+                <span class="keyword">return</span> <span class="keyword">new</span> TransactionTemplate(tm);
+        }
+
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> main(<span class="predefined-type">String</span> args<span class="type">[]</span>) {
+                ConfigurableApplicationContext applicationContext = SpringUtils
+                                .run(Application.class, <span class="string"><span class="delimiter">&quot;</span><span class="content">prod</span><span class="delimiter">&quot;</span></span>);
+                CustomerService customerService = applicationContext
+                                .getBean(CustomerService.class);
+                Demo.workWithCustomerService(Application.class, customerService);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>the <em>only</em> difference now is that we&#8217;re enabling declarative transaction management.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This is otherwise the same as any other example, except that we have the one extra annotation. Now, we can reimplement the <code>CustomerService</code> implementation. Well, we don&#8217;t have to reimplement it. Simply declare it and annotate it with <code>@Transactional</code>. All <code>public</code> methods in the implementation class then have transactions demarcated automatically.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.enable</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.stereotype.Service</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.transaction.annotation.Transactional</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.BaseCustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Customer</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+<span class="keyword">import</span> <span class="include">java.util.Collection</span>;
+
+<span class="annotation">@Service</span>
+<span class="annotation">@Transactional</span> <i class="conum" data-value="1"></i><b>(1)</b>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">TransactionalCustomerService</span> <span class="directive">extends</span> BaseCustomerService {
+
+        <span class="directive">public</span> TransactionalCustomerService(<span class="predefined-type">DataSource</span> dataSource) {
+                <span class="local-variable">super</span>(dataSource);
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">Collection</span>&lt;Customer&gt; save(<span class="predefined-type">String</span>... names) {
+                <span class="keyword">return</span> <span class="local-variable">super</span>.save(names);
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> Customer findById(<span class="predefined-type">Long</span> id) {
+                <span class="keyword">return</span> <span class="local-variable">super</span>.findById(id);
+        }
+
+        <span class="annotation">@Override</span>
+        <span class="directive">public</span> <span class="predefined-type">Collection</span>&lt;Customer&gt; findAll() {
+                <span class="keyword">return</span> <span class="local-variable">super</span>.findAll();
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>this is the only thing that we have to do - decorate the Spring bean with <code>@Transactional</code>.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>That&#8217;s it! The <code>@Transactional</code> annotation has attributes that we can use that give us some of the flexibility that we have in explicitly managing the transactions with the <code>TransactionTemplate</code>. Not all, but most. As written, we get default transaction demarcation for all public methods. We could explicitly configure transaction demarcation per-method by annotating each method with the <code>@Transactional</code> annotation and overriding the class-level configuration there.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_a_bootiful_application">A "Bootiful" Application</h3>
+<div class="paragraph">
+<p>So far, we&#8217;ve built a working application that talks to a database, manages declarative transactions, and we&#8217;ve streamlined the code as much as possible. The code is svelter because Spring can handle a lot of boilerplate code for you. So far, though, we&#8217;ve focused <em>only</em> on creating a service that talks to a database. We&#8217;re nowhere near ready for production! There&#8217;s a ton of things to sort out before we have a working REST API to which clients might connect. And we have considerably more still to do before we have a client of any sort - HTML 5, Android, iOS, whatever - to connect to our REST API. We&#8217;ve come a long way! And yet&#8230;&#8203; we&#8217;re still nowhere. We need to stand up a web server, configure a web framework, set up security, etc.</p>
+</div>
+<div class="paragraph">
+<p>Spring has us covered here. Indeed, Spring has us covered&#8230;&#8203; anywhere! We could use Spring MVC for Servlet-based web applications. We could use Spring Data and its numerous modules supporting data access across SQL and NoSQL datastores. We could use Spring Security to integrate authentication and authorization in our application. We could use Spring Integration to build out messaging-centric integration flows, talking to technologies like Apache Kafka, RabbitMQ, FTP, IMAP, JMS, etc. We could use Spring Batch to support batch processing for large, sequential data access jobs. And microservices? Yah, there is a <em>lot</em> to absorb for that, too!</p>
+</div>
+<div class="paragraph">
+<p>We also need to care about observability - something needs to articulate the application&#8217;s health so that we can run it with confidence in production and so that it can be effectively monitored. Monitoring is critical; monitoring gives us the ability to measure and, with those measurements, advance. Let&#8217;s see if we can kick things up a notch.</p>
+</div>
+<div class="sect3">
+<h4 id="_the_rise_of_the_convention_over_configuration_web_frameworks">The Rise of the Convention over Configuration Web Frameworks</h4>
+<div class="paragraph">
+<p>We need to be more productive; there&#8217;s (a lot) more to do, and it would be nice if we could exert less energy to do it. This isn&#8217;t a new problem. There have been many efforts in the Java community, and in other communities, to support more productive application development.</p>
+</div>
+<div class="paragraph">
+<p>Ruby on Rails, a web framework that debuted in 2004 and became white-hot popular in the early 2000s, is owed a large credit here. It was the first project to support what it called "convention over configuration," wherein the framework was optimized for common sense scenarios that it made trivial. In those days, there was a lot of discussion of web applications "babysitting databases."  What else do you need? An HTML-based frontend that talked behind the scenes to a SQL database described 80% of the applications at the time. Ruby on Rails optimized for this particular outcome, but it was <em>really</em> optimized! The Rails team had the famous 5-minute demo. In the space of five actual minutes, they initialized a new application and integrated data access and a user interface that supported manipulating that data. It was a <em>really</em> quick way to build user interfaces that talked to SQL databases. Ruby on Rails was driven by code generation and buoyed by the Ruby language&#8217;s dynamic nature. It coupled the representation of database state to the HTML forms and views with which users would interact. It made heavy use of code generation to get there; users interact with the command-line shell to generate new entities mapped to state in the SQL database; they used the shell to generate "scaffolding" with the views and entities. The approach is a considerable improvement over the then prolific technologies of the day.</p>
+</div>
+<div class="paragraph">
+<p>Ruby on Rails critics would say that it was very difficult to unwind the underlying assumptions. As most of a Ruby on Rails application is generated code and highly opinionated runtime code, it is very difficult to unwind the choices made by the framework without having to rewrite entire verticals of the framework. Either the code it generated for you worked the way you wanted it to, or you&#8217;d have to scrap everything. The use cases average web developers face evolved, too. If you wanted to have a user interface that, in turn, manipulated two different database entities, then things got difficult. If you wanted to build an HTTP-based REST API, then you were out of luck. If you wanted to integrate a NoSQL datastore, then you were on your own. All of these things were ultimately added to Ruby on Rails; it&#8217;s evolved, certainly. But the criticisms linger. Now, closer to 2020 than 2000, Ruby on Rails is optimized for the wrong thing. Most applications are not web applications babysitting a database anymore. They&#8217;re client-service based architectures. The clients run in different logical tiers and different physical tiers, in Android runtimes, on iOS, and in rich and capable HTML 5 browsers like Google Chrome and Mozilla Firefox.</p>
+</div>
+<div class="paragraph">
+<p>The Spring team has had an interesting history here, too. There were two efforts of note with which the Spring team was involved. The first, Spring Roo, is a code-generation approach to Java development. The premise behind Spring Roo is that there were a ton of moving parts in a working Java application circa 2008 that weren&#8217;t Java code. XML deployment descriptors. <code>.JSP</code>-based views. Hibernate mapping configuration XML files. Just a ton of things! Spring Roo took a very Ruby on Rails-centric approach to code generation, with the same fatal flaws. Assumptions were too difficult to unwind. It was optimized for one type of application.</p>
+</div>
+<div class="paragraph">
+<p>Grails leaned more heavily on runtime configuration. It had code generation, but most of its dynamic nature came from the Groovy. Both Spring Roo and Grails built on Spring. Spring Roo generated a whole bunch of Spring-based code that could be changed if needed, but the effort could be an uphill battle. Grails instead supported metaprogramming and hooks to override runtime assumptions. Grails is far and away from the most successful of the two options. I&#8217;d even argue it was the most successful of all the convention-over-configuration web frameworks after Ruby on Rails itself!</p>
+</div>
+<div class="paragraph">
+<p>What&#8217;s missing? Grails is a Groovy-centric approach to building applications. If you didn&#8217;t want to use the Groovy programming language (why wouldn&#8217;t you? It&#8217;s <em>fantastic</em>!), then Grails is probably not the solution for you. Grails was for most of its life optimized for the web applications babysitting database use case. And, finally, while Java and regular Spring could never hope to support the kind of metaprogramming that is uniquely possible in the Groovy language, they were both pretty dynamic and could offer more.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_cloud_native_applications_and_services">Cloud Native Applications and Services</h4>
+<div class="paragraph">
+<p>The shape of modern software has changed with architecture changes. No longer do we build web applications babysitting databases. Instead, clients talk to services. <em>Lots</em> of services. Small, singly focused, independently deployable, autonomously updatable, reusable, bounded contexts. <em>Microservices</em>. Microservices are the software manifestation of a new paradigm, called <em>continuous delivery</em>, where organizations optimize for continuous feedback loops by embracing software that can be easily, continuously, and incrementally updated. The goal is to shorten feedback loops to learn from iterations in production. Kenny Bastani and I look at this paradigm in O&#8217;Reilly&#8217;s epic tome <a href="http://cloudNativeJava.io"><em>Cloud Native Java</em></a>. One knock-on effect of this architectural paradigm is that software is constantly being moved from development to production; that change is constant. The things that you only worry about when you&#8217;re close to production become things you need to worry about when you&#8217;re just starting. In a continuous delivery pipeline, you could see software pushed to production due to every single <code>git push</code>! How will you handle load-balancing? Security? Monitoring and observability? DNS? HTTPS certificates? Failover? Racked-and-stacked servers? VMs? Container security?</p>
+</div>
+<div class="paragraph">
+<p>Our frameworks need to be optimized for production. They must simplify as much of this undifferentiated heavy lifting as possible.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_spring_boot">Spring Boot</h4>
+<div class="paragraph">
+<p>In 2013, we released Spring Boot to the world. Spring Boot is a different approach to building Java applications. It offers strong opinions, loosely held. Spring Boot integrates the best-of-breed components from the Spring and larger Java ecosystems into one cohesive whole. It provides default configurations for any of some scenarios but, and this part is key; it provides a built-in mechanism to undo or override those default configurations. There is <em>no</em> code generation required. A working Spring application is primarily Java code and a build artifact (a <code>build.gradle</code> or a <code>pom.xml</code>). Whatever dynamic behavior is needed can be provided at runtime using Java and metaprogramming.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s revisit our example, this time with Spring Boot. Spring Boot is just Spring. It&#8217;s Spring configuration for all the stuff that you <em>could</em> write, but that you don&#8217;t need to. I like to say that Spring Boot is your chance to pair-program with the Spring team.</p>
+</div>
+<div class="paragraph">
+<p>First, let&#8217;s look a the <code>Application</code> class.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.bootiful</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.boot.SpringApplication</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.boot.autoconfigure.SpringBootApplication</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.boot.context.event.ApplicationReadyEvent</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.annotation.Profile</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.context.event.EventListener</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.stereotype.Component</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Demo</span>;
+
+<i class="conum" data-value="1"></i><b>(1)</b>
+<span class="annotation">@SpringBootApplication</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">Application</span> {
+
+        <span class="directive">public</span> <span class="directive">static</span> <span class="type">void</span> main(<span class="predefined-type">String</span> args<span class="type">[]</span>) {
+                <i class="conum" data-value="2"></i><b>(2)</b>
+                <span class="predefined-type">System</span>.setProperty(<span class="string"><span class="delimiter">&quot;</span><span class="content">spring.profiles.active</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">prod</span><span class="delimiter">&quot;</span></span>);
+                <i class="conum" data-value="3"></i><b>(3)</b>
+                SpringApplication.run(Application.class, args);
+        }
+
+}
+
+<i class="conum" data-value="4"></i><b>(4)</b>
+<span class="annotation">@Profile</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">dev</span><span class="delimiter">&quot;</span></span>)
+<span class="annotation">@Component</span>
+<span class="type">class</span> <span class="class">DemoListener</span> {
+
+        <span class="directive">private</span> <span class="directive">final</span> CustomerService customerService;
+
+        DemoListener(CustomerService customerService) {
+                <span class="local-variable">this</span>.customerService = customerService;
+        }
+
+        <i class="conum" data-value="5"></i><b>(5)</b>
+        <span class="annotation">@EventListener</span>(ApplicationReadyEvent.class)
+        <span class="directive">public</span> <span class="type">void</span> exercise() {
+                Demo.workWithCustomerService(getClass(), <span class="local-variable">this</span>.customerService);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>@SpringBootApplication</code> is an annotation that itself is meta-annotated with a few other annotations including <code>@Configuration</code>, <code>@ComponentScan</code> and <code>@EnableAutoConfiguration</code>. The first two should be familiar, but we&#8217;ll come back to the last one in a moment.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>This application has code that runs under different profiles. Spring can take a hint from the environment as to which profile should be active in several different ways, including environment variables or Java <code>System</code> properties. I&#8217;d <em>normally</em> stick with just using the environment variables.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td><code>SpringApplication.run(&#8230;&#8203;)</code> is standard Spring Boot. This is part of every single application. It comes provided with the framework and does everything that our trivial <code>SpringUtils.run</code> method did (and considerably more).</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>In previous examples, constructing the application in production was different from the recipe for testing it. So we had to duplicate code. Here, Spring Boot behaves the same in both a test and in the production code, so we keep the call to <code>Demo.workWithCustomerService(CustomerService)</code> in a bean that is only active if the <code>dev</code> Spring profile is active.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td>Spring is a big bag of beans. Components can talk to each other through the use of <code>ApplicationEvent</code> instances. In this case, our bean listens for the <code>ApplicationReadyEvent</code> that tells us when the application is just about ready to start processing requests. This event gets called as late as possible in the startup sequence as possible.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The event listener mechanism is nice because it means we no longer have to muddy our <code>main(String [] args)</code> method; it is the same from one application to another.</p>
+</div>
+<div class="paragraph">
+<p>The <code>@EnableAutoConfiguration</code> annotation, though not seen, is arguably the most important part of the code we just looked at. It activates Spring Boot&#8217;s auto-configuration. Auto-configuration classes are run by the framework at startup time and given a chance to contribute objects to the resulting object graph. Specifically, when Spring Boot starts up it inspects the text file, <code>META-INF/spring.factories</code>, in all <code>.jar</code> artifacts on the CLASSPATH.  Spring Boot itself provides one, but your code could as well. The <code>spring.factories</code> text file enumerates keys and values associated with those keys.</p>
+</div>
+<div class="paragraph">
+<p>Therein, Spring Boot inspects a line that begins with <code>org.springframework.boot.autoconfigure.EnableAutoConfiguration</code>.  This line has as its value a <em>yuuuuge</em> list of fully-qualified class names. These class names are Java configuration classes. They&#8217;re classes that, in turn, contribute objects to the Spring object graph. Objects that do the things we&#8217;d much rather not do. Like, configure a web server. Or a <code>DataSource</code>.  Or a <code>PlatformTransactionManager</code> and <code>TransactionTemplate</code>. Did you notice that we didn&#8217;t import the <code>rsb.bootstrap.DataSourceConfiguration</code> class as we did in previous examples? That we didn&#8217;t define anything, really, except the bean required to exercise our <code>CustomerService</code> implementation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.bootiful</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.stereotype.Service</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.BaseCustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.enable.TransactionalCustomerService</span>;
+
+<span class="keyword">import</span> <span class="include">javax.sql.DataSource</span>;
+
+<i class="conum" data-value="1"></i><b>(1)</b>
+<span class="annotation">@Service</span>
+<span class="type">class</span> <span class="class">BootifulCustomerService</span> <span class="directive">extends</span> TransactionalCustomerService {
+
+        BootifulCustomerService(<span class="predefined-type">DataSource</span> dataSource) {
+                <span class="local-variable">super</span>(dataSource);
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This implementation simply extends the existing <code>@Transactional</code>-annotated example. We could&#8217;ve defined that bean using a <code>@Bean</code>  provider method, too, I suppose.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Thus far, the properties we&#8217;ve been using - from <code>application.properties</code> - are automatically read in when the application starts up. We&#8217;ve been using keys that start with <code>spring.datasource</code> all this time because those are the keys that Spring Boot is expecting. It&#8217;ll even load the right property file based on which Spring profile is active!</p>
+</div>
+<div class="paragraph">
+<p>This auto-configuration is helpful already, but we can do a whole lot more. Let&#8217;s build a REST API.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="java"><span class="keyword">package</span> <span class="namespace">rsb.bootstrap.bootiful</span>;
+
+<span class="keyword">import</span> <span class="include">org.springframework.web.bind.annotation.GetMapping</span>;
+<span class="keyword">import</span> <span class="include">org.springframework.web.bind.annotation.RestController</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.Customer</span>;
+<span class="keyword">import</span> <span class="include">rsb.bootstrap.CustomerService</span>;
+
+<span class="keyword">import</span> <span class="include">java.util.Collection</span>;
+
+<i class="conum" data-value="1"></i><b>(1)</b>
+<span class="annotation">@RestController</span>
+<span class="directive">public</span> <span class="type">class</span> <span class="class">BootifulRestController</span> {
+
+        <span class="directive">private</span> <span class="directive">final</span> CustomerService customerService;
+
+        <span class="directive">public</span> BootifulRestController(CustomerService customerService) {
+                <span class="local-variable">this</span>.customerService = customerService;
+        }
+
+        <i class="conum" data-value="2"></i><b>(2)</b>
+        <span class="annotation">@GetMapping</span>(<span class="string"><span class="delimiter">&quot;</span><span class="content">/customers</span><span class="delimiter">&quot;</span></span>)
+        <span class="predefined-type">Collection</span>&lt;Customer&gt; get() {
+                <span class="keyword">return</span> <span class="local-variable">this</span>.customerService.findAll();
+        }
+
+}</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>This is another stereotype annotation, quite like <code>@Component</code> and <code>@Service</code>. It is itself meta-annotated with <code>@Component</code>. It tells Spring that this class is also a <code>@Component</code> but that it is specialized; it exposes handlers that it expects Spring MVC, the web framework in play here, to map to incoming HTTP requests</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Spring MVC knows which HTTP requests to match to which handler based on the handler methods' mapping annotations. Here, this handler method is mapped to HTTP GET requests for the URL <code>/customers</code>.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Run the application and inspect the logs. It will have announced <code>Tomcat started on port(s): &#8230;&#8203;</code>. Note the port. I&#8217;m just going to assume it&#8217;s <code>8080</code>. You should replace it with the noted port. Then visit <code><a href="http://localhost:8080/customers" class="bare">http://localhost:8080/customers</a></code> in your browser to see the resulting JSON output! You could also request that resource using <code>curl</code>. Spring Boot not only configured a working web framework for us, it also configured a webserver! Not just any webserver. It auto-configured Apache Tomcat, the world&#8217;s leading Java web server, that powers the very large majority of all Java web applications.</p>
+</div>
+<div class="paragraph">
+<p>Spring Boot will run the application, by default, on port 8080. However, we can easily customize that and so many other things about Spring Boot applications' running behavior by specifying the relevant properties in a <code>application.properties</code> or <code>application.yml</code> file. Let&#8217;s look at the configuration file.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="properties"><i class="conum" data-value="1"></i><b>(1)</b>
+spring.jmx.enabled = false
+<i class="conum" data-value="2"></i><b>(2)</b>
+server.port=0
+<i class="conum" data-value="3"></i><b>(3)</b>
+management.endpoints.web.exposure.include=*
+management.endpoint.health.show-details=always</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Do we want Spring Boot to export information about the application over the JMX protocol?</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>On what port do we want the web application run? <code>server.port=0</code> tells Spring Boot to run the application on any unused port. This is doubly convenient</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>These last two properties tell Spring Boot to expose all the Actuator endpoints and expose the Actuator Health endpoint&#8217;s details.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>What is the Actuator? Glad you asked! Our application is intended for production, and in production, no one can hear your application scream&#8230;&#8203; unless it is visible from an HTTP JSON endpoint that your monitoring systems can inspect. The Spring Boot Actuator library, which is on your CLASSPATH, auto-configures a standard set of HTTP endpoints that articulate the application&#8217;s state to support observability and operations. Want to know what the application&#8217;s health is? Visit <code><a href="http://localhost:8080/actuator/health" class="bare">http://localhost:8080/actuator/health</a></code>. Want to see metrics? Visit <code><a href="http://localhost:8080/actuator/metrics" class="bare">http://localhost:8080/actuator/metrics</a></code>. There are many other endpoints, all of which are accessible at the root endpoint, <code><a href="http://localhost:8080/actuator" class="bare">http://localhost:8080/actuator</a></code>.</p>
+</div>
+<div class="paragraph">
+<p>"Hold on a tick!" I hear you exclaim. "Where did these Actuator endpoints, and the web server that serves them up, come from?" Recall that, way back at the beginning of this journey, we visited <a href="http://start.Spring.io">the Spring Initializr</a>, where we selected some dependencies, including <code>Web</code> and <code>Actuator</code>. This resulted in build artifacts <code>spring-boot-starter-web</code> and <code>spring-boot-starter-actuator</code> being added to the resulting project&#8217;s build file. Those artifacts, in turn, contained code that our Spring Boot auto-configuration picks up and configures. It detects the classpath classes and, because those classes are on the classpath, it configures the objects required.</p>
+</div>
+<div class="paragraph">
+<p>Pretty <em>bootiful</em>, right?</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_but_what_if">But What If&#8230;&#8203;</h3>
+<div class="paragraph">
+<p>You know, I wasn&#8217;t sure how long this chapter was going to take or if it was even worth doing. I halfway thought that I could take for granted that many people already knew Spring and Spring Boot basics. I wasn&#8217;t going to do it. I wasn&#8217;t going to do it until one day; a student approached me with a fairly trivial question in one of my classes. She had used Spring Boot for a couple of years. She&#8217;d come to the Spring Boot ecosystem from the Node.js ecosystem and had no other Java background. She had joined a team, and they&#8217;d been successful in building a monolithic application with Spring Boot because the happy path cases were friction-free and worked as advertised. Her team had built a pretty sophisticated application and took it to production, entirely by adhering to the happy-paths. She was stuck, however, and wondered if I could help. We spent ten minutes answering the wrong questions when it dawned on me she had no familiarity with Spring Framework itself! She&#8217;d never had to use it before Spring Boot. Here was this very competent engineer (she had successfully built React-based applications! She was more sophisticated than I am&#8230;&#8203;) who was stuck because she lacked a foundational understanding of the technologies behind  Spring Boot! That is our fault. We on the Spring Boot team are always trying to do better here. I hope that this chapter is a straight line from basics to "bootiful" and that you have an idea of, roughly, what&#8217;s supposed to happen in a Spring Boot application. Hopefully, this clears up a few things. Hopefully, you&#8217;ve got a clear picture of what to do next.</p>
+</div>
+<div class="paragraph">
+<p>Sometimes you won&#8217;t, though! Sometimes things break, and it&#8217;s hard to be sure why. It can be daunting to debug an application if you don&#8217;t know where to start, so let&#8217;s talk about some first-line-of-defense tricks for understanding Spring Boot applications.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Use the Debug Switch</strong>: Spring Boot will log all the auto-configuration classes that were evaluated, and in what way, if you flip the debug switch. The easiest way might be to set an environment variable, <code>export DEBUG=true</code>, before running the application. You can also run the Java program using <code>--debug=true</code>. Your IDE, like IntelliJ IDEA Ultimate edition or Spring Tool Suite, might have a checkbox you can use when running the application to switch the debug flag on</p>
+</li>
+<li>
+<p><strong>Use the Actuator</strong>: the Actuator, as configured in our example, will have many useful endpoints that will aid you. <code>/actuator/beans</code> will show you all the objects and how they are wired together. <code>/actuator/configprops</code> will show you the properties that you could put in the <code>application.(yml|properties)</code> file that can be used to configure the running application. <code>/actuator/conditions</code> shows you the same information as you saw printed to the console when the application started. <code>/actuator/threaddump</code> and <code>/actuator/heapdump</code> will give you thread dumps and heap dumps. Very useful if you&#8217;re trying to profile or debug race conditions.</p>
+</li>
+<li>
+<p><strong>@Enable Annotations Usually Import Configuration Classes</strong>: You can command or ctrl-click on a <code>@Enable-</code> annotation in your IDE, and you&#8217;ll be shown the source code for the annotation. You&#8217;ll very commonly see that the annotation has <code>@Import(&#8230;&#8203;)</code> and brings in a configuration class that might explain how a given thing is coming to life.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>These are some first-cut approaches to problems you might encounter, but they&#8217;re by no means your only recourse. If you&#8217;re still stuck, you can depend on the largest community in the Java ecosystem to help you out! We&#8217;re always happy to help. There is, of course, the chatrooms - <code>spring-projects</code>[<a href="http://Gitter.im/spring-projects" class="bare">http://Gitter.im/spring-projects</a>] and <code>spring-cloud</code>[<a href="http://gitter.im/Spring-Cloud" class="bare">http://gitter.im/Spring-Cloud</a>] - where you need only your Github ID to post questions and to chat with the folks behind the projects. The Spring team frequent those chat rooms, so drop on in and say hi! Also, we monitor several different tags on Stackoverflow <a href="http://spring.io/questions">so be sure to try that, too</a>!</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_deployment">Deployment</h3>
+<div class="paragraph">
+<p>We&#8217;ve got an application up and running, and we&#8217;ve even got Actuator in there. At this point, it&#8217;s time to figure out how to deploy it. The first thing to keep in mind is that Spring Boot is deployed as a so-called "fat" <code>.jar</code> artifact. Examine the <code>pom.xml</code> file, and you&#8217;ll find that the <code>spring-boot-maven-plugin</code> has been configured. When you go to the root of the project and run <code>mvn clean package</code>, the plugin will attempt to bundle up your application code and all the relevant dependencies into a single artifact you can run using <code>java -jar &#8230;&#8203;</code>. In our particular case, it will fail because it won&#8217;t be able to unambiguously resolve the single class with the <code>main(String &#8230;&#8203; args)</code> method to run. To get it to run, configure the Maven plugin&#8217;s <code>mainClass</code> configuration element, pointing it to the last <code>Application</code> instance we created.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;plugin&gt;</span>
+    <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="tag">&lt;/artifactId&gt;</span>
+    <span class="tag">&lt;configuration&gt;</span>
+        <span class="tag">&lt;mainClass&gt;</span>rsb.bootstrap.bootiful.Application<span class="tag">&lt;/mainClass&gt;</span>
+    <span class="tag">&lt;/configuration&gt;</span>
+<span class="tag">&lt;/plugin&gt;</span></code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, when you run <code>mvn clean package</code>, you&#8217;ll get a working <code>.jar</code> in the <code>target</code> directory. You can do any of some things with it from there. You might deploy it to a cloud platform, like Cloud Foundry.</p>
+</div>
+<div class="listingblock">
+<div class="title">Deploying the application to a Cloud Foundry foundation</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="shell">cf push -p target/my-jar.jar my-new-app</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This will upload the artifact to the platform, which will assign it a <code>PORT</code> and a load-balanced URI to announce on the shell.</p>
+</div>
+<div class="paragraph">
+<p>You could <a href="https://spring.io/guides/gs/spring-boot-docker/">also containerize the application</a> and deploy that to Cloud Foundry, or a Kubernetes distribution like <a href="https://pivotal.io/platform/pivotal-container-service">PKS</a>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_next_steps_2">Next Steps</h3>
+<div class="paragraph">
+<p>In this chapter, we&#8217;ve examined the logical evolution of an application from basic to "bootiful." We&#8217;ve hopefully established that Spring Boot is a force multiplier. Hopefully, you&#8217;re clear on how it could be used to build an application that&#8217;s destined for production. Hopefully, you&#8217;re clear on the basic workflow. You start at <a href="http://start.spring.io">the Spring Initializr</a>, you add the relevant "starter" dependencies to activate desired functionality, and then configure the application, if necessary, by changing properties and contributing objects. From here, the world is your oyster! There are dozens of Pivotal-sponsored projects supporting Spring and far more besides maintained by third parties. Want to work with Microsoft Azure? Use their Spring Boot support. Want to work with Alibaba&#8217;s Cloud? Use Spring Cloud Alibaba. Want to work with Google Cloud Platform? Check out Spring Cloud GCP. Want to work on Amazon Web Services? Check out Spring Cloud AWS! The list of interesting third party APIs goes on and on.</p>
+</div>
+<div class="paragraph">
+<p>Thus far, we&#8217;ve focused entirely on synchronous and blocking, input and output because I presume that this is a model with which you&#8217;re already familiar, and we could focus in this chapter on  Spring itself. The general workflow of building reactive, non-blocking, asynchronous Spring Boot applications is the same as introduced in this chapter. We&#8217;ve just left those specifics for later.</p>
+</div>
+<div class="paragraph">
+<p>So, let&#8217;s get to it!</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="acknowledgements">Acknowledgements</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -611,7 +2133,7 @@ table.CodeRay td.code>pre{padding:0}
 <div id="footer">
 <div id="footer-text">
 Version 1.0<br>
-Last updated 2021-05-25 09:24:11 UTC
+Last updated 2021-05-25 09:32:17 UTC
 </div>
 </div>
 </body>
