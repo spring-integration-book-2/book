@@ -35,7 +35,7 @@ This will generate and start downloading a new project in a `.zip` archive, in w
 .The generated project structure.
 [source,java,indent=0]
 ----
-include::includes/demo-tree.txt[the tree of the Maven project generated from the Spring Initializr]
+include::{code}/bootstrap/includes/demo-tree.txt[the tree of the Maven project generated from the Spring Initializr]
 ----
 
 This is a stock-standard Maven project. The only thing that might not be familiar is the https://github.com/takari/maven-wrapper[Maven wrapper] - those files starting with `mvnw`. The Maven wrapper provides shell scripts, for different operating systems, that download the Apache Maven distribution required to run this project's build. This is particularly handy when you want to get the build to run as you'd expect it to run in a continuous integration environment. If you're on a UNIX-like environment (macOS, any Linux flavor), you will run `mvnw`. On Windows, you would run `mvnw.cmd`.
