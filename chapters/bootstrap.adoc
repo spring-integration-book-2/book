@@ -410,7 +410,7 @@ We've got an application up and running, and we've even got Actuator in there. A
 </plugin>
 ----
 
-Now, when you run `mvn clean package`, you'll get a working `.jar` in the `target` directory. You can do any of some things with it from there. You might deploy it to a cloud platform, like Cloud Foundry.
+Now, when you run `mvn clean package`, you'll get a working `.jar` in the `target` directory. You can do any of some things with it from there. You might deploy it to a cloud platform, like Cloud Foundry, like this:
 
 .Deploying the application to a Cloud Foundry foundation
 [source,shell,indent=0]
@@ -420,12 +420,16 @@ cf push -p target/my-jar.jar my-new-app
 
 This will upload the artifact to the platform, which will assign it a `PORT` and a load-balanced URI to announce on the shell.
 
-You could https://spring.io/guides/gs/spring-boot-docker/[also containerize the application] and deploy that to Cloud Foundry, or a Kubernetes distribution like https://pivotal.io/platform/pivotal-container-service[PKS].
+You could also easily containerize the application with Spring Boot's built-in support for OCI/Docker images. Ensure you have the Docker daemon running somewhere, then run `mvn clean package spring-boot:build-image` and stand back. It might take a minute, but when the process completes you'll be rewarded with a Docker image that you can then `docker tag` and `docker push` to any container registry of your choice. (Might I recommend https://docs.pivotal.io/vmware-harbor/index.html[VMWare's Harbor])
+
+You could then deploy that container itself to Cloud Foundry, or to a Kubernetes distribution like https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/index.html[Tanzu Kubernetes Grid].
+
+
 
 == Next Steps
 
-In this chapter, we've examined the logical evolution of an application from basic to "bootiful." We've hopefully established that Spring Boot is a force multiplier. Hopefully, you're clear on how it could be used to build an application that's destined for production. Hopefully, you're clear on the basic workflow. You start at http://start.spring.io[the Spring Initializr], you add the relevant "starter" dependencies to activate desired functionality, and then configure the application, if necessary, by changing properties and contributing objects. From here, the world is your oyster! There are dozens of Pivotal-sponsored projects supporting Spring and far more besides maintained by third parties. Want to work with Microsoft Azure? Use their Spring Boot support. Want to work with Alibaba's Cloud? Use Spring Cloud Alibaba. Want to work with Google Cloud Platform? Check out Spring Cloud GCP. Want to work on Amazon Web Services? Check out Spring Cloud AWS! The list of interesting third party APIs goes on and on.
+In this chapter, we've examined the logical evolution of an application from basic to "bootiful." We've hopefully established that Spring Boot is a force multiplier. Hopefully, you're clear on how it could be used to build an application that's destined for production. Hopefully, you're clear on the basic workflow. You start at http://start.spring.io[the Spring Initializr], you add the relevant "starter" dependencies to activate desired functionality, and then configure the application, if necessary, by changing properties and contributing objects. From here, the world is your oyster! There are dozens of VMware-sponsored projects supporting Spring and far more besides maintained by third parties. Want to work with Microsoft Azure? Use their Spring Boot support. Want to work with Alibaba's Cloud? Use Spring Cloud Alibaba. Want to work with Google Cloud Platform? Check out Spring Cloud GCP. Want to work on Amazon Web Services? Check out Spring Cloud AWS! The list of interesting third party APIs goes on and on.
 
-Thus far, we've focused entirely on synchronous and blocking, input and output because I presume that this is a model with which you're already familiar, and we could focus in this chapter on  Spring itself.
+As we move to an increasingly distributed world, with the body of services and systems
 
 So, let's get to it!
