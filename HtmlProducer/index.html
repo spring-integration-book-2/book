@@ -605,13 +605,13 @@ table.CodeRay td.code>pre{padding:0}
 <h2 id="bootstrap">Bootcamp</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>To appreciate reactive programming in the broader ecosystem&#8217;s context, we&#8217;ll need to learn about Spring. What is Spring? What is dependency injection? Why do we use Spring Boot over (or in addition to?) Spring Framework? This chapter is a primer on the basics. We don&#8217;t talk about reactive programming in this chapter at all. If you already know the fundamentals of dependency injection, inversion-of-control, Java configuration, Spring application contexts, aspect-oriented programming (AOP),  and Spring Boot auto-configuration, skip this chapter!</p>
+<p>To appreciate reactive programming in the broader ecosystem&#8217;s context, we&#8217;ll need to learn about Spring. What is Spring? What is dependency injection? Why do we use Spring Boot over (or in addition to?) Spring Framework? This chapter is a primer on the basics. We don&#8217;t talk about reactive programming in this chapter at all. If you already know the fundamentals of dependency injection, inversion-of-control, Java configuration, Spring application contexts, aspect-oriented programming (AOP), and Spring Boot auto-configuration, skip this chapter!</p>
 </div>
 <div class="paragraph">
-<p>For the rest of us, we&#8217;re going to demonstrate some key concepts by building something. We&#8217;ll begin our journey, as usual, at my <em>second</em> <a href="http://start.Spring.io">favorite place on the internet, the Spring Initializr -  Start dot Spring dot IO</a>. Our goal is to build a trivial application. I specified <code>sib</code> in the <code>Group</code> field and <code>bootstrap</code> in the <code>Artifact</code> field, though please feel free to select whatever you&#8217;d like. Select the following dependencies using the combo box text field on the bottom right of the page where it says <code>Search for dependencies</code>: <code>DevTools</code>,  <code>Web</code>, <code>H2</code>, <code>JDBC</code>, <code>Actuator</code> and <code>Lombok</code>.</p>
+<p>For the rest of us, we&#8217;re going to demonstrate some key concepts by building something. We&#8217;ll begin our journey, as usual, at our <em>second</em> <a href="http://start.Spring.io">favorite place on the internet, the Spring Initializr - Start dot Spring dot IO</a>. Our goal is to build a trivial application. I specified <code>sib</code> in the <code>Group</code> field and <code>bootstrap</code> in the <code>Artifact</code> field, though please feel free to select whatever you&#8217;d like. Select the following dependencies using the combo box text field on the bottom right of the page where it says <code>Search for dependencies</code>: <code>DevTools</code>, <code>Web</code>, <code>H2</code>, <code>JDBC</code>, <code>Actuator</code> and <code>Lombok</code>.</p>
 </div>
 <div class="paragraph">
-<p><code>Devtools</code> lets us restart the application by running our IDE&#8217;s build command. No need to restart the entire JVM process. This lets us iterate quicker and see changes in the compiled code quicker. It also starts up a Livereload-protocol server. Some excellent browser plugins out there can listen for messages on this server and force the browser page to refresh, giving you a seamless what-you-see-is-what-you-get experience.</p>
+<p><code>Devtools</code> lets us restart the application by running our IDE&#8217;s build command eliminating the need to reload the entire JVM process.  The result is quicker execution iterations and code-change visibility in the compiled code. It also starts up a Livereload-protocol server. Some excellent browser plugins out there can listen for messages on this server and force the browser page to refresh, giving you a seamless 'WSYSIWYG' type of experience.</p>
 </div>
 <div class="quoteblock">
 <blockquote>
@@ -622,7 +622,7 @@ table.CodeRay td.code>pre{padding:0}
 <i class="fa icon-tip" title="Tip"></i>
 </td>
 <td class="content">
-If you&#8217;re using the Spring Tool Suite, you need only save your code, and you&#8217;ll see changes here. IntelliJ has no built-in notion of a "save," and so no hook off of which to hang this event. You&#8217;ll need to instead "build" the code. Go to <code>Build</code> &gt; <code>Build the project</code>. On a Mac, you could use Cmd + F9.
+If you&#8217;re using the Spring Tool Suite, you need only save your code, and you&#8217;ll see changes here. IntelliJ has no built-in idea of a "save," and so no listener for this event. You&#8217;ll need to instead "build" the code. Go to <code>Build</code> &gt; <code>Build the project</code>. On a Mac, you could use Cmd + F9.
 </td>
 </tr>
 </table>
@@ -674,7 +674,80 @@ If you&#8217;re using the Spring Tool Suite, you need only save your code, and y
 <div class="listingblock">
 <div class="title">Your Maven build <code>pom.xml</code> should look something like this:</div>
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="xml">Unresolved directive in chapters/bootstrap.adoc - include::/home/runner/Desktop/root/code/bootstrap/bootstrap-maven-pom.xml[]</code></pre>
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="preprocessor">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="tag">&lt;project</span> <span class="attribute-name">xmlns</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">http://maven.apache.org/POM/4.0.0</span><span class="delimiter">&quot;</span></span>
+         <span class="attribute-name">xmlns:xsi</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">http://www.w3.org/2001/XMLSchema-instance</span><span class="delimiter">&quot;</span></span>
+         <span class="attribute-name">xsi:schemaLocation</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+    <span class="tag">&lt;modelVersion&gt;</span>4.0.0<span class="tag">&lt;/modelVersion&gt;</span>
+
+    <span class="tag">&lt;groupId&gt;</span>rsb<span class="tag">&lt;/groupId&gt;</span>
+    <span class="tag">&lt;artifactId&gt;</span>bootstrap<span class="tag">&lt;/artifactId&gt;</span>
+    <span class="tag">&lt;version&gt;</span>0.0.1-SNAPSHOT<span class="tag">&lt;/version&gt;</span>
+    <span class="tag">&lt;packaging&gt;</span>jar<span class="tag">&lt;/packaging&gt;</span>
+
+    <span class="tag">&lt;name&gt;</span>bootstrap<span class="tag">&lt;/name&gt;</span>
+    <span class="tag">&lt;description&gt;</span>Demo project for Spring Boot<span class="tag">&lt;/description&gt;</span>
+
+    <span class="tag">&lt;parent&gt;</span>
+        <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+        <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-parent<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;version&gt;</span>2.5.0<span class="tag">&lt;/version&gt;</span>
+        <span class="tag">&lt;relativePath</span><span class="tag">/&gt;</span> <span class="comment">&lt;!-- lookup parent from repository --&gt;</span>
+    <span class="tag">&lt;/parent&gt;</span>
+
+    <span class="tag">&lt;properties&gt;</span>
+        <span class="tag">&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class="tag">&lt;/project.build.sourceEncoding&gt;</span>
+        <span class="tag">&lt;project.reporting.outputEncoding&gt;</span>UTF-8
+        <span class="tag">&lt;/project.reporting.outputEncoding&gt;</span>
+        <span class="tag">&lt;java.version&gt;</span>1.8<span class="tag">&lt;/java.version&gt;</span>
+    <span class="tag">&lt;/properties&gt;</span>
+
+    <span class="tag">&lt;dependencies&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-actuator<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-web<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-jdbc<span class="tag">&lt;/artifactId&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-devtools<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>runtime<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>com.h2database<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>h2<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>runtime<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.projectlombok<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>lombok<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;optional&gt;</span>true<span class="tag">&lt;/optional&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+        <span class="tag">&lt;dependency&gt;</span>
+            <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+            <span class="tag">&lt;artifactId&gt;</span>spring-boot-starter-test<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;scope&gt;</span>test<span class="tag">&lt;/scope&gt;</span>
+        <span class="tag">&lt;/dependency&gt;</span>
+    <span class="tag">&lt;/dependencies&gt;</span>
+
+    <span class="tag">&lt;build&gt;</span>
+        <span class="tag">&lt;plugins&gt;</span>
+            <span class="tag">&lt;plugin&gt;</span>
+                <span class="tag">&lt;groupId&gt;</span>org.springframework.boot<span class="tag">&lt;/groupId&gt;</span>
+                <span class="tag">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="tag">&lt;/artifactId&gt;</span>
+            <span class="tag">&lt;/plugin&gt;</span>
+        <span class="tag">&lt;/plugins&gt;</span>
+    <span class="tag">&lt;/build&gt;</span>
+
+
+<span class="tag">&lt;/project&gt;</span></code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2054,7 +2127,7 @@ management.endpoint.health.show-details=always</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 1.0<br>
-Last updated 2021-05-26 01:06:30 UTC
+Last updated 2021-05-26 01:19:15 UTC
 </div>
 </div>
 </body>
