@@ -2,7 +2,7 @@
 = Bootcamp
 
 
-To appreciate reactive programming in the broader ecosystem's context, we'll need to learn about Spring. What is Spring? What is dependency injection? Why do we use Spring Boot over (or in addition to?) Spring Framework? This chapter is a primer on the basics. We don't talk about reactive programming in this chapter at all. If you already know the fundamentals of dependency injection, inversion-of-control, Java configuration, Spring application contexts, aspect-oriented programming (AOP), and Spring Boot auto-configuration, skip this chapter!
+To appreciate integration, we'll need to learn about Spring. What is Spring? What is dependency injection? Why do we use Spring Boot over (or in addition to?) Spring Framework? This chapter is a primer on the basics. We don't talk about integration in this chapter at all. If you already know the fundamentals of dependency injection, inversion-of-control, Java configuration, Spring application contexts, aspect-oriented programming (AOP), and Spring Boot auto-configuration, skip this chapter!
 
 For the rest of us, we're going to demonstrate some key concepts by building something. We'll begin our journey, as usual, at our _second_ http://start.Spring.io[favorite place on the internet, the Spring Initializr - Start dot Spring dot IO]. Our goal is to build a trivial application. I specified `sib` in the `Group` field and `bootstrap` in the `Artifact` field, though please feel free to select whatever you'd like. Select the following dependencies using the combo box text field on the bottom right of the page where it says `Search for dependencies`: `DevTools`, `Web`, `H2`, `JDBC`, `Actuator` and `Lombok`.
 
@@ -22,12 +22,12 @@ There are some other choices if we're so inclined. What version of the JVM do yo
 
 For all that we _did_ specify, we _didn't_ specify Spring itself. Or a logging library. Or any of a dozen sort of ceremonial framework-y bits that we'll need to do the job. Those are implied in the other dependencies when using Spring Boot, so we don't need to worry about them.
 
-Now, I hear you cry, "what about reactive?" Good point! We'll get there, I promise, but nothing we're introducing in this section is reactive simply because we need to have a baseline. These days, it's fair game to assume you've some familiarity with things like JDBC (the Java Database Connectivity API) and the Servlet specification (there's traditionally been very little to be done on the web tier in Java that doesn't involve the Servlet specification).
+We'll get to integration, I promise, but nothing we're introducing in this section concerns itself with integration simply because we need to have a baseline. These days, it's fair game to assume you've some familiarity with things like JDBC (the Java Database Connectivity API) and the Servlet specification (there's traditionally been very little to be done on the web tier in Java that doesn't involve the Servlet specification).
 
 
 Scroll to the bottom and select `Generate Project`.
 
-.This shows us the selections on the Spring Initializr for a new, reactive application.
+.This shows us the selections on the Spring Initializr for a new application.
 image::{code}/bootstrap/the-spring-initializr.png[alt=the Spring Initializr]
 
 This will generate and start downloading a new project in a `.zip` archive, in whatever folder your browser stores downloaded files. Unzip the archive, and you'll see the following layout:
@@ -426,6 +426,6 @@ You could https://spring.io/guides/gs/spring-boot-docker/[also containerize the 
 
 In this chapter, we've examined the logical evolution of an application from basic to "bootiful." We've hopefully established that Spring Boot is a force multiplier. Hopefully, you're clear on how it could be used to build an application that's destined for production. Hopefully, you're clear on the basic workflow. You start at http://start.spring.io[the Spring Initializr], you add the relevant "starter" dependencies to activate desired functionality, and then configure the application, if necessary, by changing properties and contributing objects. From here, the world is your oyster! There are dozens of Pivotal-sponsored projects supporting Spring and far more besides maintained by third parties. Want to work with Microsoft Azure? Use their Spring Boot support. Want to work with Alibaba's Cloud? Use Spring Cloud Alibaba. Want to work with Google Cloud Platform? Check out Spring Cloud GCP. Want to work on Amazon Web Services? Check out Spring Cloud AWS! The list of interesting third party APIs goes on and on.
 
-Thus far, we've focused entirely on synchronous and blocking, input and output because I presume that this is a model with which you're already familiar, and we could focus in this chapter on  Spring itself. The general workflow of building reactive, non-blocking, asynchronous Spring Boot applications is the same as introduced in this chapter. We've just left those specifics for later.
+Thus far, we've focused entirely on synchronous and blocking, input and output because I presume that this is a model with which you're already familiar, and we could focus in this chapter on  Spring itself.
 
 So, let's get to it!
