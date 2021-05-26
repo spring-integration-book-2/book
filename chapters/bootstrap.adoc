@@ -10,20 +10,19 @@ For the rest of us, we're going to demonstrate some key concepts by building som
 
 > TIP: If you're using the Spring Tool Suite, you need only save your code, and you'll see changes here. IntelliJ has no built-in idea of a "save," and so no listener for this event. You'll need to instead "build" the code. Go to `Build` > `Build the project`. On a Mac, you could use Cmd + F9.
 
-`Web` brings in everything you'd need today to build an application based on the Servlet specification and traditional Spring MVC. It brings in form validation, JSON and XML marshaling, WebSocket support, REST- and HTTP-controller support, etc. `H2` is an embedded SQL database that will lose its state on every restart. This is ideal for our first steps since we won't have to install a database (or reset it).
+`Web` brings in everything you'd need today to build an application based on the Servlet specification and traditional Spring MVC. It brings in form validation, JSON and XML marshaling, WebSocket support, REST- and HTTP-controller support, etc. `H2` is an embedded SQL database that will lose its state on every restart. This ease of use is ideal for our first steps since we won't install a database (or reset it).
 
 `JDBC` brings in support, like the `JdbcTemplate`, for working with SQL-based databases.
 
-`Lombok` is a compile-time annotation processor that synthesizes things like getters, setters, `toString()` methods, `equals()` methods, and so much more with but a few annotations. Most of these annotations are self-explanatory in describing what they contribute to the class on which they're placed.
+`Lombok` is a compile-time annotation processor synthesizing things like getters, setters, `toString()` methods, `equals()` methods, and so much more with but a few annotations. Most of these annotations are self-explanatory in describing what they contribute to the class in which they live.
 
-`Actuator` contributes HTTP endpoints, under `/actuator/\*`, that give visibility into the application's state.
+`Actuator` contributes HTTP endpoints, under `/actuator/\*`, giving visibility into the application's state.
 
 There are some other choices if we're so inclined. What version of the JVM do you want to target? (I'd recommend using the version corresponding to the latest OpenJDK build.) What language do you want? We'll explore Kotlin later, but let's use Java for now. Groovy is... well, _groovy_! It's a recommended choice, too. You can leave all the other values at their defaults for this simple application.
 
 For all that we _did_ specify, we _didn't_ specify Spring itself. Or a logging library. Or any of a dozen sort of ceremonial framework-y bits that we'll need to do the job. Those are implied in the other dependencies when using Spring Boot, so we don't need to worry about them.
 
-We'll get to integration, I promise, but nothing we're introducing in this section concerns itself with integration simply because we need to have a baseline. These days, it's fair game to assume you've some familiarity with things like JDBC (the Java Database Connectivity API) and the Servlet specification (there's traditionally been very little to be done on the web tier in Java that doesn't involve the Servlet specification).
-
+We'll get to integration, I promise, but nothing we're introducing in this section concerns itself with integration simply because we need to have a baseline. These days, it's fair game to assume you've some familiarity with JDBC (the Java Database Connectivity API) and the Servlet specification (there's traditionally been very little done on the web tier in Java that doesn't involve the Servlet specification).
 
 Scroll to the bottom and select `Generate Project`.
 
@@ -38,7 +37,7 @@ This will generate and start downloading a new project in a `.zip` archive, in w
 include::{code}/bootstrap/includes/demo-tree.txt[the tree of the Maven project generated from the Spring Initializr]
 ----
 
-This is a stock-standard Maven project. The only thing that might not be familiar is the https://github.com/takari/maven-wrapper[Maven wrapper] - those files starting with `mvnw`. The Maven wrapper provides shell scripts, for different operating systems, that download the Apache Maven distribution required to run this project's build. This is particularly handy when you want to get the build to run as you'd expect it to run in a continuous integration environment. If you're on a UNIX-like environment (macOS, any Linux flavor), you will run `mvnw`. On Windows, you would run `mvnw.cmd`.
+This is a stock-standard Maven project. The only thing that might not be familiar is the https://github.com/takari/maven-wrapper[Maven wrapper] - those files starting with `mvnw`. The Maven wrapper provides shell scripts for different operating systems that download the Apache Maven distribution required to run this project's build. This is particularly handy when you want to get the build to run as you'd expect it to run in a continuous integration environment. If you're on a UNIX-like environment (macOS, any Linux flavor), you will run `mvnw`. On Windows, you would run `mvnw.cmd`.
 
 .Your Maven build `pom.xml` should look something like this:
 
@@ -430,6 +429,8 @@ You could then deploy that container itself to Cloud Foundry, or to a Kubernetes
 
 In this chapter, we've examined the logical evolution of an application from basic to "bootiful." We've hopefully established that Spring Boot is a force multiplier. Hopefully, you're clear on how it could be used to build an application that's destined for production. Hopefully, you're clear on the basic workflow. You start at http://start.spring.io[the Spring Initializr], you add the relevant "starter" dependencies to activate desired functionality, and then configure the application, if necessary, by changing properties and contributing objects. From here, the world is your oyster! There are dozens of VMware-sponsored projects supporting Spring and far more besides maintained by third parties. Want to work with Microsoft Azure? Use their Spring Boot support. Want to work with Alibaba's Cloud? Use Spring Cloud Alibaba. Want to work with Google Cloud Platform? Check out Spring Cloud GCP. Want to work on Amazon Web Services? Check out Spring Cloud AWS! The list of interesting third party APIs goes on and on.
 
-As we move to an increasingly distributed world, with the body of services and systems
+The world is growing increasingly distributed, and the systems and services requiring integration more numerous. We've looked at what it takes to build a Spring Boot-based service and we have a sense of some of the patterns required to get there. Spring Boot will serve as the foundation for our messaging- and Spring Integration-centric services.
+
+Spring Integration takes the concepts introduced in this chapter - inversion of control, patterns, decoupling - and extends them in a natural way to the realm of messaging andn integration. We'll see that Spring Integration decouples our business logic from the _where_ and _how_ of service integrations in the same way that Spring does for component dependencies.
 
 So, let's get to it!
