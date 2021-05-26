@@ -2093,7 +2093,7 @@ management.endpoint.health.show-details=always</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Now, when you run <code>mvn clean package</code>, you&#8217;ll get a working <code>.jar</code> in the <code>target</code> directory. You can do any of some things with it from there. You might deploy it to a cloud platform, like Cloud Foundry.</p>
+<p>Now, when you run <code>mvn clean package</code>, you&#8217;ll get a working <code>.jar</code> in the <code>target</code> directory. You can do any of some things with it from there. You might deploy it to a cloud platform, like Cloud Foundry, like this:</p>
 </div>
 <div class="listingblock">
 <div class="title">Deploying the application to a Cloud Foundry foundation</div>
@@ -2105,16 +2105,19 @@ management.endpoint.health.show-details=always</code></pre>
 <p>This will upload the artifact to the platform, which will assign it a <code>PORT</code> and a load-balanced URI to announce on the shell.</p>
 </div>
 <div class="paragraph">
-<p>You could <a href="https://spring.io/guides/gs/spring-boot-docker/">also containerize the application</a> and deploy that to Cloud Foundry, or a Kubernetes distribution like <a href="https://pivotal.io/platform/pivotal-container-service">PKS</a>.</p>
+<p>You could also easily containerize the application with Spring Boot&#8217;s built-in support for OCI/Docker images. Ensure you have the Docker daemon running somewhere, then run <code>mvn clean package spring-boot:build-image</code> and stand back. It might take a minute, but when the process completes you&#8217;ll be rewarded with a Docker image that you can then <code>docker tag</code> and <code>docker push</code> to any container registry of your choice. (Might I recommend <a href="https://docs.pivotal.io/vmware-harbor/index.html">VMWare&#8217;s Harbor</a>)</p>
+</div>
+<div class="paragraph">
+<p>You could then deploy that container itself to Cloud Foundry, or to a Kubernetes distribution like <a href="https://docs.vmware.com/en/VMware-Tanzu-Kubernetes-Grid/index.html">Tanzu Kubernetes Grid</a>.</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_next_steps_2">Next Steps</h3>
 <div class="paragraph">
-<p>In this chapter, we&#8217;ve examined the logical evolution of an application from basic to "bootiful." We&#8217;ve hopefully established that Spring Boot is a force multiplier. Hopefully, you&#8217;re clear on how it could be used to build an application that&#8217;s destined for production. Hopefully, you&#8217;re clear on the basic workflow. You start at <a href="http://start.spring.io">the Spring Initializr</a>, you add the relevant "starter" dependencies to activate desired functionality, and then configure the application, if necessary, by changing properties and contributing objects. From here, the world is your oyster! There are dozens of Pivotal-sponsored projects supporting Spring and far more besides maintained by third parties. Want to work with Microsoft Azure? Use their Spring Boot support. Want to work with Alibaba&#8217;s Cloud? Use Spring Cloud Alibaba. Want to work with Google Cloud Platform? Check out Spring Cloud GCP. Want to work on Amazon Web Services? Check out Spring Cloud AWS! The list of interesting third party APIs goes on and on.</p>
+<p>In this chapter, we&#8217;ve examined the logical evolution of an application from basic to "bootiful." We&#8217;ve hopefully established that Spring Boot is a force multiplier. Hopefully, you&#8217;re clear on how it could be used to build an application that&#8217;s destined for production. Hopefully, you&#8217;re clear on the basic workflow. You start at <a href="http://start.spring.io">the Spring Initializr</a>, you add the relevant "starter" dependencies to activate desired functionality, and then configure the application, if necessary, by changing properties and contributing objects. From here, the world is your oyster! There are dozens of VMware-sponsored projects supporting Spring and far more besides maintained by third parties. Want to work with Microsoft Azure? Use their Spring Boot support. Want to work with Alibaba&#8217;s Cloud? Use Spring Cloud Alibaba. Want to work with Google Cloud Platform? Check out Spring Cloud GCP. Want to work on Amazon Web Services? Check out Spring Cloud AWS! The list of interesting third party APIs goes on and on.</p>
 </div>
 <div class="paragraph">
-<p>Thus far, we&#8217;ve focused entirely on synchronous and blocking, input and output because I presume that this is a model with which you&#8217;re already familiar, and we could focus in this chapter on  Spring itself.</p>
+<p>As we move to an increasingly distributed world, with the body of services and systems</p>
 </div>
 <div class="paragraph">
 <p>So, let&#8217;s get to it!</p>
@@ -2148,7 +2151,7 @@ management.endpoint.health.show-details=always</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 1.0<br>
-Last updated 2021-05-26 04:31:33 UTC
+Last updated 2021-05-26 04:41:43 UTC
 </div>
 </div>
 </body>
