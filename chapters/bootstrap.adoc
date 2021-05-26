@@ -24,6 +24,7 @@ For all that we _did_ specify, we _didn't_ specify Spring itself. Or a logging l
 
 Now, I hear you cry, "what about reactive?" Good point! We'll get there, I promise, but nothing we're introducing in this section is reactive simply because we need to have a baseline. These days, it's fair game to assume you've some familiarity with things like JDBC (the Java Database Connectivity API) and the Servlet specification (there's traditionally been very little to be done on the web tier in Java that doesn't involve the Servlet specification).
 
+
 Scroll to the bottom and select `Generate Project`.
 
 .This shows us the selections on the Spring Initializr for a new, reactive application.
