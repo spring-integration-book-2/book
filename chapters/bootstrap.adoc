@@ -27,7 +27,7 @@ Now, I hear you cry, "what about reactive?" Good point! We'll get there, I promi
 Scroll to the bottom and select `Generate Project`.
 
 .This shows us the selections on the Spring Initializr for a new, reactive application.
-image::bootstrap/the-spring-initializr.png[alt=the Spring Initializr]
+image::{code}/bootstrap/the-spring-initializr.png[alt=the Spring Initializr]
 
 This will generate and start downloading a new project in a `.zip` archive, in whatever folder your browser stores downloaded files. Unzip the archive, and you'll see the following layout:
 
