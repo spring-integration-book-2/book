@@ -630,16 +630,16 @@ If you&#8217;re using the Spring Tool Suite, you need only save your code, and y
 </blockquote>
 </div>
 <div class="paragraph">
-<p><code>Web</code> brings in everything you&#8217;d need today to build an application based on the Servlet specification and traditional Spring MVC. It brings in form validation, JSON and XML marshaling, WebSocket support, REST- and HTTP-controller support, etc. <code>H2</code> is an embedded SQL database that will lose its state on every restart. This is ideal for our first steps since we won&#8217;t have to install a database (or reset it).</p>
+<p><code>Web</code> brings in everything you&#8217;d need today to build an application based on the Servlet specification and traditional Spring MVC. It brings in form validation, JSON and XML marshaling, WebSocket support, REST- and HTTP-controller support, etc. <code>H2</code> is an embedded SQL database that will lose its state on every restart. This ease of use is ideal for our first steps since we won&#8217;t install a database (or reset it).</p>
 </div>
 <div class="paragraph">
 <p><code>JDBC</code> brings in support, like the <code>JdbcTemplate</code>, for working with SQL-based databases.</p>
 </div>
 <div class="paragraph">
-<p><code>Lombok</code> is a compile-time annotation processor that synthesizes things like getters, setters, <code>toString()</code> methods, <code>equals()</code> methods, and so much more with but a few annotations. Most of these annotations are self-explanatory in describing what they contribute to the class on which they&#8217;re placed.</p>
+<p><code>Lombok</code> is a compile-time annotation processor synthesizing things like getters, setters, <code>toString()</code> methods, <code>equals()</code> methods, and so much more with but a few annotations. Most of these annotations are self-explanatory in describing what they contribute to the class in which they live.</p>
 </div>
 <div class="paragraph">
-<p><code>Actuator</code> contributes HTTP endpoints, under <code>/actuator/\*</code>, that give visibility into the application&#8217;s state.</p>
+<p><code>Actuator</code> contributes HTTP endpoints, under <code>/actuator/\*</code>, giving visibility into the application&#8217;s state.</p>
 </div>
 <div class="paragraph">
 <p>There are some other choices if we&#8217;re so inclined. What version of the JVM do you want to target? (I&#8217;d recommend using the version corresponding to the latest OpenJDK build.) What language do you want? We&#8217;ll explore Kotlin later, but let&#8217;s use Java for now. Groovy is&#8230;&#8203; well, <em>groovy</em>! It&#8217;s a recommended choice, too. You can leave all the other values at their defaults for this simple application.</p>
@@ -648,7 +648,7 @@ If you&#8217;re using the Spring Tool Suite, you need only save your code, and y
 <p>For all that we <em>did</em> specify, we <em>didn&#8217;t</em> specify Spring itself. Or a logging library. Or any of a dozen sort of ceremonial framework-y bits that we&#8217;ll need to do the job. Those are implied in the other dependencies when using Spring Boot, so we don&#8217;t need to worry about them.</p>
 </div>
 <div class="paragraph">
-<p>We&#8217;ll get to integration, I promise, but nothing we&#8217;re introducing in this section concerns itself with integration simply because we need to have a baseline. These days, it&#8217;s fair game to assume you&#8217;ve some familiarity with things like JDBC (the Java Database Connectivity API) and the Servlet specification (there&#8217;s traditionally been very little to be done on the web tier in Java that doesn&#8217;t involve the Servlet specification).</p>
+<p>We&#8217;ll get to integration, I promise, but nothing we&#8217;re introducing in this section concerns itself with integration simply because we need to have a baseline. These days, it&#8217;s fair game to assume you&#8217;ve some familiarity with JDBC (the Java Database Connectivity API) and the Servlet specification (there&#8217;s traditionally been very little done on the web tier in Java that doesn&#8217;t involve the Servlet specification).</p>
 </div>
 <div class="paragraph">
 <p>Scroll to the bottom and select <code>Generate Project</code>.</p>
@@ -690,7 +690,7 @@ If you&#8217;re using the Spring Tool Suite, you need only save your code, and y
 </div>
 </div>
 <div class="paragraph">
-<p>This is a stock-standard Maven project. The only thing that might not be familiar is the <a href="https://github.com/takari/maven-wrapper">Maven wrapper</a> - those files starting with <code>mvnw</code>. The Maven wrapper provides shell scripts, for different operating systems, that download the Apache Maven distribution required to run this project&#8217;s build. This is particularly handy when you want to get the build to run as you&#8217;d expect it to run in a continuous integration environment. If you&#8217;re on a UNIX-like environment (macOS, any Linux flavor), you will run <code>mvnw</code>. On Windows, you would run <code>mvnw.cmd</code>.</p>
+<p>This is a stock-standard Maven project. The only thing that might not be familiar is the <a href="https://github.com/takari/maven-wrapper">Maven wrapper</a> - those files starting with <code>mvnw</code>. The Maven wrapper provides shell scripts for different operating systems that download the Apache Maven distribution required to run this project&#8217;s build. This is particularly handy when you want to get the build to run as you&#8217;d expect it to run in a continuous integration environment. If you&#8217;re on a UNIX-like environment (macOS, any Linux flavor), you will run <code>mvnw</code>. On Windows, you would run <code>mvnw.cmd</code>.</p>
 </div>
 <div class="listingblock">
 <div class="title">Your Maven build <code>pom.xml</code> should look something like this:</div>
@@ -2117,7 +2117,10 @@ management.endpoint.health.show-details=always</code></pre>
 <p>In this chapter, we&#8217;ve examined the logical evolution of an application from basic to "bootiful." We&#8217;ve hopefully established that Spring Boot is a force multiplier. Hopefully, you&#8217;re clear on how it could be used to build an application that&#8217;s destined for production. Hopefully, you&#8217;re clear on the basic workflow. You start at <a href="http://start.spring.io">the Spring Initializr</a>, you add the relevant "starter" dependencies to activate desired functionality, and then configure the application, if necessary, by changing properties and contributing objects. From here, the world is your oyster! There are dozens of VMware-sponsored projects supporting Spring and far more besides maintained by third parties. Want to work with Microsoft Azure? Use their Spring Boot support. Want to work with Alibaba&#8217;s Cloud? Use Spring Cloud Alibaba. Want to work with Google Cloud Platform? Check out Spring Cloud GCP. Want to work on Amazon Web Services? Check out Spring Cloud AWS! The list of interesting third party APIs goes on and on.</p>
 </div>
 <div class="paragraph">
-<p>As we move to an increasingly distributed world, with the body of services and systems</p>
+<p>The world is growing increasingly distributed, and the systems and services requiring integration more numerous. We&#8217;ve looked at what it takes to build a Spring Boot-based service and we have a sense of some of the patterns required to get there. Spring Boot will serve as the foundation for our messaging- and Spring Integration-centric services.</p>
+</div>
+<div class="paragraph">
+<p>Spring Integration takes the concepts introduced in this chapter - inversion of control, patterns, decoupling - and extends them in a natural way to the realm of messaging andn integration. We&#8217;ll see that Spring Integration decouples our business logic from the <em>where</em> and <em>how</em> of service integrations in the same way that Spring does for component dependencies.</p>
 </div>
 <div class="paragraph">
 <p>So, let&#8217;s get to it!</p>
@@ -2151,7 +2154,7 @@ management.endpoint.health.show-details=always</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 1.0<br>
-Last updated 2021-05-26 04:41:43 UTC
+Last updated 2021-05-26 04:54:30 UTC
 </div>
 </div>
 </body>
