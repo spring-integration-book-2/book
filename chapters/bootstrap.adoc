@@ -10,17 +10,17 @@ For the rest of us, we're going to demonstrate some key concepts by building som
 
 > TIP: If you're using the Spring Tool Suite, you need only save your code, and you'll see changes here. IntelliJ has no built-in idea of a "save," and so no listener for this event. You'll need to instead "build" the code. Go to `Build` > `Build the project`. On a Mac, you could use Cmd + F9.
 
-`Web` brings in everything you'd need today to build an application based on the Servlet specification and traditional Spring MVC. It brings in form validation, JSON and XML marshaling, WebSocket support, REST- and HTTP-controller support, etc. `H2` is an embedded SQL database that will lose its state on every restart. This ease of use is ideal for our first steps since we won't install a database (or reset it).
+`Web` brings in everything you'd need today to build an application based on the Servlet specification and traditional Spring MVC. It brings in form validation, JSON and XML marshaling, WebSocket support, REST- and HTTP-controller support, etc. 
 
-`JDBC` brings in support, like the `JdbcTemplate`, for working with SQL-based databases.
+`JDBC` brings in support, like the `JdbcTemplate`, for working with SQL-based databases. `H2` is an embedded SQL database that will lose its state on every restart. This ease of use is ideal for our first steps since we won't install a database (or reset it).
 
-`Lombok` is a compile-time annotation processor synthesizing things like getters, setters, `toString()` methods, `equals()` methods, and so much more with but a few annotations. Most of these annotations are self-explanatory in describing what they contribute to the class in which they live.
+`Lombok` is a compile-time annotation processor generating things like getters, setters, `toString()` methods, `equals()` methods, and so much more with but a few annotations. 
 
 `Actuator` contributes HTTP endpoints, under `/actuator/\*`, giving visibility into the application's state.
 
-There are some other choices if we're so inclined. What version of the JVM do you want to target? (I'd recommend using the version corresponding to the latest OpenJDK build.) What language do you want? We'll explore Kotlin later, but let's use Java for now. Groovy is... well, _groovy_! It's a recommended choice, too. You can leave all the other values at their defaults for this simple application.
+There are some other choices if we're so inclined. What version of the JVM do you want to target? (I'd recommend using the version corresponding to the latest OpenJDK build.) What language do you want? We'll explore Kotlin later, but let's use Java for now. 
 
-For all that we _did_ specify, we _didn't_ specify Spring itself. Or a logging library. Or any of a dozen sort of ceremonial framework-y bits that we'll need to do the job. Those are implied in the other dependencies when using Spring Boot, so we don't need to worry about them.
+For all that we _did_ specify, we _didn't_ specify Spring itself. Or a logging library. Or any of a dozen framework-y bits that we'll need to do the job. Those are implied in the other dependencies when using Spring Boot, so we don't need to worry about them.
 
 We'll get to integration, I promise, but nothing we're introducing in this section concerns itself with integration simply because we need to have a baseline. These days, it's fair game to assume you've some familiarity with JDBC (the Java Database Connectivity API) and the Servlet specification (there's traditionally been very little done on the web tier in Java that doesn't involve the Servlet specification).
 
@@ -46,15 +46,15 @@ This is a stock-standard Maven project. The only thing that might not be familia
 include::{code}/bootstrap/bootstrap-maven-pom.xml[]
 ----
 
-Our Maven build file, `pom.xml`, is pretty plain. Each checkbox selected on the Spring Initializr is represented as a dependency in the `pom.xml` build file. Most of them will have the `groupId` `org.springframework.boot`. We selected `Web`, and that corresponds to a dependency for building web applications with `artifactId`   `spring-boot-starter-web`, for example. That explains where at least three of our dependencies came from. But that doesn't explain all of them. Testing is important, and we're in the future, and in the future, everybody tests. (Right!!...?) You'll see at least `spring-boot-starter-test` among the dependencies added to your Maven build. The Spring Initializr often adds other testing libraries where appropriate based on the libraries you've added. There's no "opt-in" for it. The Spring Initializr generates new projects with test dependencies automatically. (You're welcome!)
+Our Maven build file, `pom.xml`, is rather plain. Each checkbox selected on the Spring Initializr is represented as a dependency in the `pom.xml` build file. Most of them will have the `groupId` `org.springframework.boot`. We selected `Web`, and that corresponds to a dependency for building web applications with `artifactId` `spring-boot-starter-web`, for example. That explains where at least three of our dependencies came from. Let's take a closer look. Testing is important, and we're in the future, and in the future, everybody tests.  You'll see at least `spring-boot-starter-test` among the dependencies added to your Maven build. The Spring Initializr often adds other testing libraries where appropriate based on the libraries you've added. There's no "opt-in" for it. The Spring Initializr generates new projects with test dependencies automatically.
 
 There's also an empty property file, `src/main/resources/application.properties`. Later, we'll see that we can specify properties to configure the application. Spring can read both `.properties` files and `.yaml` files.
 
-This is a stock-standard Spring Boot application with a `public static void main(String[] args)` entry-point class, `BootstrapApplication.java`. It is an empty class with a `main` method and an annotation, and it is _glorious_! While I'd love to stay here in the land of little, to jump right into bombastic Spring Boot, this wouldn't be much of a _bootstrap_ lesson without some background! So, delete `BootstrapApplication.java`. We'll get there. But first, some basics.
+This basic Spring Boot application comes with a `public static void main(String[] args)` entry-point class, `BootstrapApplication.java`. It is an empty class with a `main` method and an annotation, and it is _glorious_! While I'd love to stay here in the land of Lilliputian to jump right into bombastic Spring Boot, this wouldn't be much of a _bootstrap_ lesson without some background! So, delete `BootstrapApplication.java`. We'll get there. But first, some basics.
 
-== A Big ol' Bag o' Beans
+== Bean by the bag
 
-Spring Framework, the first project to bear the Spring moniker, is at its core a dependency injection framework. Dependency injection frameworks are simple things with very profound possibilities. The idea is simple: applications change a lot. Decoupling, broadly, helps to reduce the cost of changing our application code and system architecture. So we write code in such a way that it is ignorant of where dependencies - collaborating objects - originate.
+Spring Framework, the first project to bear the Spring moniker, is at its core a dependency injection framework. Dependency injection frameworks are simple things with very profound possibilities. The idea is simple: applications change a lot. Decoupling helps to reduce the cost of changing our application code and system architecture. So we write code that separates behavior from implementation. Dependencies may originate from anywhere, but we can control where that happens.
 
 == The `CustomerService`
 
