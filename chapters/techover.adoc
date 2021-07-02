@@ -30,7 +30,44 @@ We will discuss in depth the varieties of message channel implementations, but f
 
 == Message Endpoints
 
-Spring Integration simplifies the composition of messaging based software. That is, because messaging is a means to connect heterogeneus systems together, the overall architecture of an Integration takes into focus the disparate domains in which each system is built on. Spring Integration gives a declarative approach to configuration in this setting, and allows you to "connect" the domain-specific code to the messaging infrastructure provided by Spring Integration. The most important influence within this kind of platform is the sperartion-of-concern between integration logic, and business logic. Basically, as with MVC, we dont rely on the actual server to the job, but usually a set of external domain-focus systems. Messaging makes getting data in and out of these domain focused systems simple and reliable.
+Spring Integration simplifies the composition of messaging based software. That is, because messaging is a means to connect heterogeneus systems together, the overall architecture of an Integration takes into focus the disparate domains in which each system is built on. Spring Integration gives a declarative approach to configuration in this setting, and allows you to "connect" the domain-specific code to the messaging infrastructure provided by Spring Integration. Thus, the components being connected to these messaging infrastructure are called messaging endpoints. The most important influence within this kind of architecture is the sperartion-of-concern between integration logic, and business logic. Basically, as with MVC, we dont rely on the actual server to the job, but usually a set of external domain-focus systems. Messaging makes getting data in and out of these domain focused systems not only intuitive but resiliant and predictable.
 
+== Host of Endpoint Variants
 
+The following list shows the main kinds of message endpoints supported by Spring Integration out of the box:
+
+=== Transformer
+
+A Transformer converts the message content or structure. Think of a user identity manager which turns a username/password pair into a User of that system. Similarly, a transformer can modify the message's header values.
+
+=== Filter
+
+Filters simply allows or disallows a message to pass through the channel. This implies a boolean test method that check message state for determining conditions of acceptance. If the message is accepted, it goes along to the output channel. In the other hand, a Filter may drop, or throw Exception.
+
+[NOTE]
+====
+Be careful not to confuse the generic use of “filter” within the pipes-and-filters architectural pattern with this specific endpoint type that selectively narrows down the messages flowing between two channels. The pipes-and-filters concept of a “filter” matches more closely with Spring Integration’s message endpoint: any component that can be connected to a message channel in order to send or receive messages.
+====
+
+=== Router 
+
+This component can determine which channel to send a particular message based on its content. Message router can be equated to a static output channel configured with a service activator or another endpoint capable of a 'reply' message.
+
+=== Splitter
+
+Splitters can break an incoming message into multiple messages and send them to the appropriate channel(s). This is typically used for decomposing messages into discreet elements consumable in the output channel. An example is turning a String into a series of Chars.
+
+=== Aggregator
+
+Like Splitter in reverse, this component combines multiple messages into one. An aggregator is more complex than a splitter and is often required to maintain state. In case aggregation reaches time limits - timeout - a strategy can be employed that determines how partial aggregates are handled.
+
+=== Service activator
+
+The Service Activator is the interface between the message channel and a service instance, many times containing the application code for business logic.
+
+=== Channel adapter
+
+Is used to connect the message channel to another system or transport.
+
+Each of these message endpoints encapsulate the semantics of the Integration pattern it is named after, and will be reviewed in greater detail LATER IN THIS BOOK.
 
