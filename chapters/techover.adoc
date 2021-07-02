@@ -1,7 +1,6 @@
 [[techover]]
 = Tech Overview
 
-
 Spring Integration provides an intuitive programming model for complex enterprise integration strategies. These Integration strategies are adopted in asynchronous, message-driven style while being loosly coupled for modularity and testability. The goal here, much like Spring Framework itself, enforces separation of concerns between business and integration logic. Thus adoption among existing Spring users means they can rely on the same style and abstract nature that help to promote reusability and portability across projects. Spring Integration's design is indeed a blend of both these common patterns within Spring, and the patterns described in Enterprise Integration Patterns, by Gregor Hohpe and Bobby Woolf (Addison Wesley, 2004). 
 
 Architectural facilities that promote loose coupling are the interfaces defining the contracts between layers of abstraction. For example, messaging systems typically follow the similarly abstract "pipes-and-filters" model.  Whereas "filters" represent components that produce or consume messages, whereas the "pipes" represent components that transport messages between filters.  Thus the underlaying infrastructure supporting "pipes" are programmed as a set of interfaces having 'input/output', 'read/write' semantics. Similarly, the "filters" must be programmed in a way that issues 'input/output' semantic over an application's service layer interfaces in much the same way a web or socket tier would.
@@ -42,7 +41,7 @@ A Transformer converts the message content or structure. Think of a user identit
 
 === Filter
 
-Filters simply allows or disallows a message to pass through the channel. This implies a boolean test method that check message state for determining conditions of acceptance. If the message is accepted, it goes along to the output channel. In the other hand, a Filter may drop, or throw Exception.
+Filters simply allows or disallows a message to pass through the channel. This implies a boolean test method that check message state for determining conditions of acceptance. If the message is accepted, it goes along to the output channel. In the other case, a Filter may drop, or throw Exception.
 
 [NOTE]
 ====
@@ -63,11 +62,29 @@ Like Splitter in reverse, this component combines multiple messages into one. An
 
 === Service activator
 
-The Service Activator is the interface between the message channel and a service instance, many times containing the application code for business logic.
+The Service Activator is the interface between the message channel and a service instance, many times containing the application code for business logic. Service activators make 'reply' an option since each message can provide a 'Return Address' header in the absense of output channel. 
+
+.Service Activator
+image::{code}/techover/the-service-activator.png[alt=The Service Activator]
 
 === Channel adapter
 
-Is used to connect the message channel to another system or transport.
+Is used to connect the message channel to another system or transport. Usually a Channel Adapter makes the leap between protocol boundaries and does mapping to bind the two sides. This for example
+can be something like converting an HTTP request to SMTP, or maybe
+Files to JMS message. Spring Integration provides a host of Channel Adapter implementations for popular technologies. This endpoint also comes in 2 flavours - Inbound and Outbound.
 
-Each of these message endpoints encapsulate the semantics of the Integration pattern it is named after, and will be reviewed in greater detail LATER IN THIS BOOK.
+.Inbound Adapter
+image::{code}/techover/inbound-channel-adapter.png[alt=Inbound Channel Adapter]
 
+The Inbound adapter may be a static resource such as file system. In this case, new file arrivals can trigger the adapter to Stringify and send file contents as a Message on the programmed output channels.
+
+.Outbound Adapter
+image::{code}/techover/outbound-channel-adapter.png[alt=Outbound Channel Adapter]
+
+The direction of message flow is reverse of Inbound Adapter. Outbound adapters will typically consume a message, then transform it into a protocol the adapter is binding to. For example a message may arrive with filename as a header property, so that the adapter writes the message as a file to the filesystem.
+
+== Summary
+
+Each of these message endpoints encapsulate the semantics of the Integration pattern it is named after, and will be reviewed in greater detail LATER IN THIS BOOK. 
+
+In the next chapter, we will tackle the vital configuration aspects  that help us assemble a functional application. Later, we will begin diving into the concrete implementation details for each of the listed components. Using Spring Boot and Spring Integration together has never been more delightful.
