@@ -6,10 +6,31 @@ Spring Integration provides an intuitive programming model for complex enterpris
 
 Architectural facilities that promote loose coupling are the interfaces defining the contracts between layers of abstraction. For example, messaging systems typically follow the similarly abstract "pipes-and-filters" model.  Whereas "filters" represent components that produce or consume messages, whereas the "pipes" represent components that transport messages between filters.  Thus the underlaying infrastructure supporting "pipes" are programmed as a set of interfaces having 'input/output', 'read/write' semantics. Similarly, the "filters" must be programmed in a way that issues 'input/output' semantic over an application's service layer interfaces in much the same way a web or socket tier would.
 
-Data is important amongst all components of any program. Thus in an Integration solution, it is the 'Message'. This is a wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected transports. This metadata as it were lets the application transport or direct a message to it's downstream terminus. For example, if a message is an email, then header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various transports. We will focus more on metadata and metadata strategies later in this book.
+== Message
+
+Data is important amongst all components of any program. Thus in an Integration solution, it is the 'Message'. This is a wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected transports. This metadata lets the application transport or direct a message to it's downstream terminus. For example, if a message is an email, then header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various transports. We will focus more on metadata and metadata strategies later in this book.
 
 .A message composition diagram.
 image::{code}/techover/the-message.png[alt=The Message]
+
+The Message Channel concept enables transmission of messages from producers to consumers. This constitues the "pipe" of our pipes-and-filters architecture. Consumers retrieve messages from a particular Message Channel, thus providing a convenient place for certain actions to be performed on the messages after it's producer has sent it to the channel, and before the consumer has received it.
+
+.A message channel diagram.
+image::{code}/techover/the-message-channel.png[alt=The Message Channel]
+
+Message Channels have 2 behaviors: "Point-to-point" and "Publish-Subscribe" that specify how consumers receive a message. The Point-to-Point channel specifies that no more than one consumer may receive a message sent to the channel. Publish-subscribe (also known as Pubsub) channels, will allow a 'fan-out' approach whereas any number of consumers may receive the message.
+
+Channels should behave according to design of the capacity of inductance toward consumers. That is, a channel may or may not 
+buffer messages sent across it. Buffering implies a 'queue'
+structure underneath the channel allowing the consumer to 'poll' or periodically check for additional messages. The advantage here
+is that a consumer may opt to consume as many as can be handled - prevention of memory and network preassure. This works well for point-to-point channels. On the other hand, because we may not want to store messages in the channel, but rather issue them as fast as possible is more of a publish-subscribe symantic. The Integration platform itself doesnt know how messages line up with channels; it is up to the developer to logically align channels with the endpoints
+that will receive messages. This is all to say that Channels are indeed the logical 'address' of a message-driven system. Because of this, it is only intuition that says channels are referenced with names like 'qa-mail-out' and 'qa-file-in' - basically these names by which the operator can control (by clearing, reloading or some other action) and ensure proper system-wide operation.
+
+We will discuss in depth the varieties of message channel implementations, but for now understand that channels provide the message-driven abstraction layer above transport to which a subscriber may participate.
+
+== Message Endpoints
+
+Spring Integration simplifies the composition of messaging based software. That is, because messaging is a means to connect heterogeneus systems together, the overall architecture of an Integration takes into focus the disparate domains in which each system is built on. Spring Integration gives a declarative approach to configuration in this setting, and allows you to "connect" the domain-specific code to the messaging infrastructure provided by Spring Integration. The most important influence within this kind of platform is the sperartion-of-concern between integration logic, and business logic. Basically, as with MVC, we dont rely on the actual server to the job, but usually a set of external domain-focus systems. Messaging makes getting data in and out of these domain focused systems simple and reliable.
 
 
 
