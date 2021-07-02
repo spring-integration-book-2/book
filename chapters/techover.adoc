@@ -1,0 +1,15 @@
+[[techover]]
+= Tech Overview
+
+
+Spring Integration provides an intuitive programming model for complex enterprise integration strategies. These Integration strategies are adopted in asynchronous, message-driven style while being loosly coupled for modularity and testability. The goal here, much like Spring Framework itself, enforces separation of concerns between business and integration logic. Thus adoption among existing Spring users means they can rely on the same style and abstract nature that help to promote reusability and portability across projects. Spring Integration's design is indeed a blend of both these common patterns within Spring, and the patterns described in Enterprise Integration Patterns, by Gregor Hohpe and Bobby Woolf (Addison Wesley, 2004). 
+
+Architectural facilities that promote loose coupling are the interfaces defining the contracts between layers of abstraction. For example, messaging systems typically follow the similarly abstract "pipes-and-filters" model.  Whereas "filters" represent components that produce or consume messages, whereas the "pipes" represent components that transport messages between filters.  Thus the underlaying infrastructure supporting "pipes" are programmed as a set of interfaces having 'input/output', 'read/write' semantics. Similarly, the "filters" must be programmed in a way that issues 'input/output' semantic over an application's service layer interfaces in much the same way a web or socket tier would.
+
+Data is important amongst all components of any program. Thus in an Integration solution, it is the 'Message'. This is a wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected transports. This metadata as it were lets the application transport or direct a message to it's downstream terminus. For example, if a message is an email, then header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various transports. We will focus more on metadata and metadata strategies later in this book.
+
+.A message composition diagram.
+image::{code}/techover/the-message.png[alt=The Message]
+
+
+
