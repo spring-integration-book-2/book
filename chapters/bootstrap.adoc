@@ -425,12 +425,12 @@ You could then deploy that container itself to Cloud Foundry, or to a Kubernetes
 
 
 
-== Next Steps
+== Summary
 
 In this chapter, we've examined the logical evolution of an application from basic to "bootiful." We've hopefully established that Spring Boot is a force multiplier. Hopefully, you're clear on how it could be used to build an application that's destined for production. Hopefully, you're clear on the basic workflow. You start at http://start.spring.io[the Spring Initializr], you add the relevant "starter" dependencies to activate desired functionality, and then configure the application, if necessary, by changing properties and contributing objects. From here, the world is your oyster! There are dozens of VMware-sponsored projects supporting Spring and far more besides maintained by third parties. Want to work with Microsoft Azure? Use their Spring Boot support. Want to work with Alibaba's Cloud? Use Spring Cloud Alibaba. Want to work with Google Cloud Platform? Check out Spring Cloud GCP. Want to work on Amazon Web Services? Check out Spring Cloud AWS! The list of interesting third party APIs goes on and on.
 
 The world is growing increasingly distributed, and the systems and services requiring integration more numerous. We've looked at what it takes to build a Spring Boot-based service and we have a sense of some of the patterns required to get there. Spring Boot will serve as the foundation for our messaging- and Spring Integration-centric services.
 
-Spring Integration takes the concepts introduced in this chapter - inversion of control, patterns, decoupling - and extends them in a natural way to the realm of messaging andn integration. We'll see that Spring Integration decouples our business logic from the _where_ and _how_ of service integrations in the same way that Spring does for component dependencies.
+Spring Integration takes the concepts introduced in this chapter - inversion of control, patterns, decoupling - and extends them in a natural way to the realm of messaging and integration. We'll see that Spring Integration decouples our business logic from the _where_ and _how_ of service integrations in the same way that Spring does for component dependencies.
 
 So, let's get to it!

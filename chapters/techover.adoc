@@ -7,7 +7,7 @@ Architectural facilities that promote loose coupling are the interfaces defining
 
 == Message
 
-Data is important amongst all components of any program. Thus in an Integration solution, it is the 'Message'. This is a wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected transports. This metadata lets the application transport or direct a message to it's downstream terminus. For example, if a message is an email, then header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various transports. We will focus more on metadata and metadata strategies later in this book.
+Data is important amongst all components of any program. Thus in an Integration solution, it is the 'Message'. This is a wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected transports. This metadata lets the application transport or direct a message to it's downstream terminus. For example, if a message is an email, then header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various endpoints. We will focus more on metadata and metadata strategies later in this book. For now, lets take a look at what it means for a message to get through an Integration system.
 
 .A message composition diagram.
 image::{code}/techover/the-message.png[alt=The Message]
@@ -33,32 +33,44 @@ Spring Integration simplifies the composition of messaging based software. That 
 
 == Host of Endpoint Variants
 
-The following list shows the main kinds of message endpoints supported by Spring Integration out of the box:
+The following list shows the main kinds of message endpoints supported in Spring Integration apps:
 
 === Transformer
 
 A Transformer converts the message content or structure. Think of a user identity manager which turns a username/password pair into a User of that system. Similarly, a transformer can modify the message's header values.
 
+.Transformer
+image::{code}/techover/transformer.png[alt=Transformer]
+
 === Filter
 
 Filters simply allows or disallows a message to pass through the channel. This implies a boolean test method that check message state for determining conditions of acceptance. If the message is accepted, it goes along to the output channel. In the other case, a Filter may drop, or throw Exception.
 
-[NOTE]
-====
-Be careful not to confuse the generic use of “filter” within the pipes-and-filters architectural pattern with this specific endpoint type that selectively narrows down the messages flowing between two channels. The pipes-and-filters concept of a “filter” matches more closely with Spring Integration’s message endpoint: any component that can be connected to a message channel in order to send or receive messages.
-====
+.Filter
+image::{code}/techover/filter.png[alt=Filter]
+
+> TIP: Be careful not to confuse the generic use of “filter” within the pipes-and-filters architectural pattern with this specific endpoint type that selectively narrows down the messages flowing between two channels. The pipes-and-filters concept of a “filter” matches more closely with Spring Integration’s message endpoint: any component that can be connected to a message channel in order to send or receive messages.
 
 === Router 
 
 This component can determine which channel to send a particular message based on its content. Message router can be equated to a static output channel configured with a service activator or another endpoint capable of a 'reply' message.
 
+.Router
+image::{code}/techover/router.png[alt=Router]
+
 === Splitter
 
 Splitters can break an incoming message into multiple messages and send them to the appropriate channel(s). This is typically used for decomposing messages into discreet elements consumable in the output channel. An example is turning a String into a series of Chars.
 
+.Splitter
+image::{code}/techover/splitter.png[alt=Splitter]
+
 === Aggregator
 
 Like Splitter in reverse, this component combines multiple messages into one. An aggregator is more complex than a splitter and is often required to maintain state. In case aggregation reaches time limits - timeout - a strategy can be employed that determines how partial aggregates are handled.
+
+.Aggregator
+image::{code}/techover/aggregator.png[alt=Aggregator]
 
 === Service activator
 
@@ -81,7 +93,11 @@ The Inbound adapter may be a static resource such as file system. In this case, 
 .Outbound Adapter
 image::{code}/techover/outbound-channel-adapter.png[alt=Outbound Channel Adapter]
 
-The direction of message flow is reverse of Inbound Adapter. Outbound adapters will typically consume a message, then transform it into a protocol the adapter is binding to. For example a message may arrive with filename as a header property, so that the adapter writes the message as a file to the filesystem.
+The direction of an outbound message flow is opposite of Inbound. Outbound adapters will typically consume a message, then transform it into a protocol the adapter is binding to. For example a message may arrive with filename as a header property, so that the adapter writes the message payload as a file to the filesystem.
+
+== Putting them together
+
+So, what exactly does it mean to compose and utilize Spring Integration's components in practice? How does the Spring Framework wire these dependencies together to create a cohesive Integration. In the next few chapters, we are going to take a look at what this means. We'll see how Spring aggregates configuration metadata from annotations and beans exposed to the ApplicationContext. Then we will make the leap to Framework DSL's that will simplify inplementation the necessary pieces. 
 
 == Summary
 
