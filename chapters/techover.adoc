@@ -7,10 +7,23 @@ Architectural facilities that promote loose coupling are the interfaces defining
 
 == Message
 
-Data is important amongst all components of any program. Thus in an Integration solution, it is the 'Message'. This is a wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected transports. This metadata lets the application transport or direct a message to it's downstream terminus. For example, if a message is an email, then header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various endpoints. We will focus more on metadata and metadata strategies later in this book. For now, lets take a look at what it means for a message to get through an Integration system.
+As the most common of components, there is data; flowing in and out of systems with gusto! A most basic abstraction that suffices for all interoperability between disprate components. Thus in an Integration solution, it is the 'Message'. This is a wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected transports. For example, if a message is an email, then the header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various endpoints. We will focus more on metadata and metadata strategies later in this book. For now, lets take a look at what it means for a message to get through an Integration system.
 
 .A message composition diagram.
 image::{code}/techover/the-message.png[alt=The Message]
+
+** DO's and Dont's** 
+
+Messages shall contain just enough data to be useful within the boundry of such system which produced it. Additional inferences should be made
+by downstream components which 'enrich' (see later) data as needed by further downstream components. This is because sometimes, not all data is needed at once.  
+
+For example, take a User object. The User Object might contain just a username, and a small amount of domain-specific data ( such as home directory ).
+However, there is also additional information such as profile information - address, phone number, email, etc... - and authentication data - password and login - Not all data is needed at the same time! Thus it makes sense to only look-up such data whenever it is actually needed. Likewise, a message should contain just enough data to get to the next component in your system, and nothing more.
+
+Keep in mind, Integrations are going to support consumption of data specific to component's end-use scenarios such as login, state changes, comparison and etc... You will want to design your Integration for seperation of concerns being as light as possible.
+
+
+== Message Channel
 
 The Message Channel concept enables transmission of messages from producers to consumers. This constitues the "pipe" of our pipes-and-filters architecture. Consumers retrieve messages from a particular Message Channel, thus providing a convenient place for certain actions to be performed on the messages after it's producer has sent it to the channel, and before the consumer has received it.
 
@@ -44,7 +57,7 @@ image::{code}/techover/transformer.png[alt=Transformer]
 
 === Filter
 
-Filters simply allows or disallows a message to pass through the channel. This implies a boolean test method that check message state for determining conditions of acceptance. If the message is accepted, it goes along to the output channel. In the other case, a Filter may drop, or throw Exception.
+Filters simply allows or disallows a message to pass through the channel. This implies a boolean test method that checks message state for determining conditions of acceptance. If the message is accepted, it goes along to the output channel. In the other case, a Filter may drop, or throw Exception.
 
 .Filter
 image::{code}/techover/filter.png[alt=Filter]
@@ -81,9 +94,7 @@ image::{code}/techover/the-service-activator.png[alt=The Service Activator]
 
 === Channel adapter
 
-Is used to connect the message channel to another system or transport. Usually a Channel Adapter makes the leap between protocol boundaries and does mapping to bind the two sides. This for example
-can be something like converting an HTTP request to SMTP, or maybe
-Files to JMS message. Spring Integration provides a host of Channel Adapter implementations for popular technologies. This endpoint also comes in 2 flavours - Inbound and Outbound.
+Is used to connect the message channel to another system or transport. Usually a Channel Adapter makes the leap between protocol boundaries and does mapping to bind the two sides. This for example can be something like converting an HTTP request to SMTP, or maybe Files to JMS message. Spring Integration provides a host of Channel Adapter implementations for popular technologies. This endpoint also comes in 2 flavours - Inbound and Outbound.
 
 .Inbound Adapter
 image::{code}/techover/inbound-channel-adapter.png[alt=Inbound Channel Adapter]
@@ -103,4 +114,4 @@ So, what exactly does it mean to compose and utilize Spring Integration's compon
 
 Each of these message endpoints encapsulate the semantics of the Integration pattern it is named after, and will be reviewed in greater detail LATER IN THIS BOOK. 
 
-In the next chapter, we will tackle the vital configuration aspects  that help us assemble a functional application. Later, we will begin diving into the concrete implementation details for each of the listed components. Using Spring Boot and Spring Integration together has never been more delightful.
+In the next chapter, we will tackle the vital configuration aspects  that help us assemble a functional application. Later, we will begin diving into the concrete implementation details for each of the listed components. Using Spring Boot and Spring Integration together has never been more easy.
