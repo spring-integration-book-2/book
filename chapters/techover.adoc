@@ -1,27 +1,26 @@
 [[techover]]
 = Tech Overview
 
-Spring Integration provides an intuitive programming model for complex enterprise integration strategies. These Integration strategies are adopted in asynchronous, message-driven style while being loosly coupled for modularity and testability. The goal here, much like Spring Framework itself, enforces separation of concerns between business and integration logic. Thus adoption among existing Spring users means they can rely on the same style and abstract nature that help to promote reusability and portability across projects. Spring Integration's design is indeed a blend of both these common patterns within Spring, and the patterns described in Enterprise Integration Patterns, by Gregor Hohpe and Bobby Woolf (Addison Wesley, 2004). 
+Spring Integration provides an intuitive programming model for complex enterprise integration strategies. These Integration strategies are adopted in asynchronous, message-driven style while being loosly coupled for modularity and testability. The goal here, much like Spring Framework itself, enforces separation of concerns between business and integration logic. Thus adoption among existing Spring users means they can rely on the same style and abstract nature that help to promote reusability and portability across projects. Spring Integration's design is indeed a blend of both these common patterns within Spring, and the patterns described in Enterprise Integration Patterns, by Gregor Hohpe and Bobby Woolf (Addison Wesley, 2004).
 
 Architectural facilities that promote loose coupling are the interfaces defining the contracts between layers of abstraction. For example, messaging systems typically follow the similarly abstract "pipes-and-filters" model.  Whereas "filters" represent components that produce or consume messages, whereas the "pipes" represent components that transport messages between filters.  Thus the underlaying infrastructure supporting "pipes" are programmed as a set of interfaces having 'input/output', 'read/write' semantics. Similarly, the "filters" must be programmed in a way that issues 'input/output' semantic over an application's service layer interfaces in much the same way a web or socket tier would.
 
 == Message
 
-As the most common of components, there is data; flowing in and out of systems with gusto! A most basic abstraction that suffices for all interoperability between disprate components. Thus in an Integration solution, it is the 'Message'. This is a wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected transports. For example, if a message is an email, then the header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various endpoints. We will focus more on metadata and metadata strategies later in this book. For now, lets take a look at what it means for a message to get through an Integration system.
+As the most common of components, there is data. A Message is the most basic abstraction that suffices for all interoperability between disprate components. This is the wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected endpoints/transports. For example, if a message is an email, then the header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various endpoints. We will focus more on metadata and metadata strategies later in this book. For now, lets take a look at what it means for a message to get through an Integration system.
 
 .A message composition diagram.
 image::{code}/techover/the-message.png[alt=The Message]
 
-** DO's and Dont's** 
+** DO's and Dont's**
 
-Messages shall contain just enough data to be useful within the boundry of such system which produced it. Additional inferences should be made
-by downstream components which 'enrich' (see later) data as needed by further downstream components. This is because sometimes, not all data is needed at once.  
+Messages shall contain just enough data to be useful within the boundry of such system which produced it. Additional inferences should be made 
+by downstream components which 'enrich' (see later) data as needed by further downstream components. This is because sometimes, not all data is needed at once. 
 
 For example, take a User object. The User Object might contain just a username, and a small amount of domain-specific data ( such as home directory ).
 However, there is also additional information such as profile information - address, phone number, email, etc... - and authentication data - password and login - Not all data is needed at the same time! Thus it makes sense to only look-up such data whenever it is actually needed. Likewise, a message should contain just enough data to get to the next component in your system, and nothing more.
 
-Keep in mind, Integrations are going to support consumption of data specific to component's end-use scenarios such as login, state changes, comparison and etc... You will want to design your Integration for seperation of concerns being as light as possible.
-
+Keep in mind, Integrations are going to support consumption of data specific to component's end-use scenarios such as login, state changes, comparison and so on. You will want to design your Integration for seperation of domain concerns as.
 
 == Message Channel
 
@@ -104,10 +103,10 @@ The direction of an outbound message flow is opposite of Inbound. Outbound adapt
 
 == Putting them together
 
-So, what exactly does it mean to compose and utilize Spring Integration's components in practice? How does the Spring Framework wire these dependencies together to create a cohesive Integration. In the next few chapters, we are going to take a look at what this means. We'll see how Spring aggregates configuration metadata from annotations and beans exposed to the ApplicationContext. Then we will make the leap to Framework DSL's that will simplify inplementation the necessary pieces. 
+So, what exactly does it mean to compose and utilize Spring Integration's components in practice? How does the Spring Framework wire these dependencies together to create a cohesive Integration. In the next few chapters, we are going to take a look at what this means. We'll see how Spring aggregates configuration metadata from annotations and beans exposed to the ApplicationContext. Then we will make the leap to Framework DSL's that will simplify inplementation the necessary pieces.
 
 == Summary
 
-Each of these message endpoints encapsulate the semantics of the Integration pattern it is named after, and will be reviewed in greater detail LATER IN THIS BOOK. 
+Each of these message endpoints encapsulate the semantics of the Integration pattern it is named after, and will be reviewed in greater detail LATER IN THIS BOOK.
 
-In the next chapter, we will tackle the vital configuration aspects  that help us assemble a functional application. Later, we will begin diving into the concrete implementation details for each of the listed components. Using Spring Boot and Spring Integration together has never been more easy.
+In the next chapter, we will tackle the vital configuration aspects  that help us assemble a functional Integration-style application. Later in the book, we will dive into the concrete implementation details for each of the listed components. Using Spring Boot and Spring Integration together has never been easy.

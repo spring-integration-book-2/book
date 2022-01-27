@@ -1,0 +1,489 @@
+[[flows]]
+= Message Flows
+
+Messages usually move in a system in a straight line, moving from one endpoint to the next. On
+occasion, however, a little bit of flexibility is required; a message might need to visit two different
+endpoints at the same time, or it might need to be conditionally sent to one and not another. The
+progression of messages through a system is like the progression of a steady stream; it takes skill and
+ingenuity (and care!) to safely route the flow.
+In Spring Integration, a message router decides what channel or channels should receive the
+message next. This decision is based on the message’s content and/or metadata contained in the
+message header. A message filter determines if the message should be passed to the output channel at
+all, again based on the message’s content and/or metadata. A message splitter partitions an inbound
+message into several parts and sends the resultant messages out. An aggregator is the counterpart to the
+splitter; it combines multiple messages into a single message. A resequencer works like a splitter, but
+does not process the messages in any way; it simply releases the messages to downstream components
+in a particular order. These are the different components available for controlling message flows in
+Spring Integration. They will all be discussed in this chapter. This chapter will also discuss simplifying
+the configuration using a message handler chain.
+Messaging is inherently stateless. Spring Integration lets you work with the allusion of state by
+propagating headers from endpoint to endpoint. This lets you make local decisions, to act in the
+integration flow with the knowledge of the state of any given message at any given time, but it does not
+afford you the big-picture view of a directed process. This is where a workflow steps in. Workflow and
+how to use a workflow engine with Spring Integration is the last topic in this chapter.
+
+== Message Flow Patterns
+
+Message routing is simple: specific data will only go to particular endpoints based on the payload or
+metadata. For example, a stock market data feed system will typically handle a few dozen types of
+market instruments whose routes are negotiated in terms of market sector, equity type, and region. This
+is where a message router can be leveraged. Filtering provides a way to gate the flow of messages based
+on some condition, which can be very useful as well. This is similar to TCP/IP where firewalls can
+provide deep-packet inspection to selectively meter traffic.
+Enterprise applications with many discrete datasets may need to process a large amount of
+information where sending an entire set of data to one location for processing is inefficient.
+Partitionable data can be efficiently processed by splitting it and processing the pieces.
+Let’s look at some of the common types of routing.
+
+=== Router
+
+Routing is one of the most common patterns in data processing today. Data at every level—protocol
+suites all the way up to full blown APIs—all provide a way to move data in different ways based on
+conditions. In Spring Integration, a router can do things like forward messages to multiple endpoints or
+determine which from among many is to receive a message.
+
+=== Filter
+
+A message filter complements a router in determining whether an incoming message is to be forwarded
+to a channel or not. The logic is simply stated as "forward, or don't forward" based on evaluative logic
+declared in configuration or custom code. Traditionally, filters are put between channels with a high
+message flow where the need to reduce the number of messages is necessary.
+
+=== Splitter
+
+A splitter is a component that takes a single message and breaks it into multiple individual messages. An
+example of where this might be useful is an order processing system where a single order contains many
+line items that describe products made by different companies. Identifying the line item and the
+corresponding vendor will allow the splitter to create an individual message for each company. Thus,
+using a splitter enables a seamless way to direct the orders to a specific vendor.
+
+=== Aggregator
+
+An aggregator component accepts multiple related messages and then assembles them into a single
+message. Its job is the inverse of the splitter, as it is common to find an aggregator downstream of a
+splitter. The aggregator uses a construct known as correlation strategy to determine related messages
+within a group. The process that gives indication of a complete group is known as the completion
+strategy. For example, through a common property (e.g. order ID), a completion condition may be
+identified that causes an aggregator to compile a new message. In this case, a delivery-ready message for
+a product order may only be created once all collaborating vendors have produced order-procurement
+messages in response to an order-request. The message sent by the aggregator may further the order
+down the pipeline. Spring Integration provides a number of strategies to achieve this efficiently and
+simply. In addition, you may also define your own.
+
+=== Resequencer
+
+A resequencer consumes many correlated messages and reassigns the order in which they are delivered.
+It is similar to the aggregator in that the messages consumed belong to some correlation group; however,
+it differs where message delivery is taken into consideration. While an aggregator combines messages to
+form a single message, a resequencer simply reorders messages to allow consistent consumption on the
+downstream message endpoint.
+
+== Message Flows with Spring Integration
+
+Let’s look at how Spring Integration implements the common message flow patterns. Examples will be
+provided for each of the patterns. A known list of channels may be specified for a router where the
+incoming Message<T> may be passed. This means that the process flow may be changed conditionally,
+and it also means that a message may be forwarded to as many (or as few) channels as desired. The
+org.springframework.integration.router package provides several convenient router implementations,
+such as payload type–based routing PayloadTypeRouter and routing to a list of channels
+RecipientListRouter.
+For example, imagine a processing pipeline in which investment instruments are routed depending
+on their type, such as stocks or bonds. When each instrument is finally processed, specific fields may get
+added that are relevant to that instrument type. The domain object that represents each investment is
+shown in the following snippet.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/ChatMessage.java[]
+----
+
+For this sample, lets also create a utility that describes concrete instances of chat messages that may 
+be sent to the message channel.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/ChatMessageGenerator.java[]
+----
+
+The router element makes defining a router as simple as specifying an input channel and a router
+implementation bean. As with other Spring Integration components, routing can be implemented
+directly using Spring Integration’s annotation support with a @Router annotated method on any plain
+old Java object (POJO). This annotation expects the evaluation result of either a string for the channel
+name, a collection of names of MessageChannels, or a single MessageChannel. An example of a custom
+router component is shown in Listing 8–3. The message will be passed to the message channel with the
+name matching the ChatMessage property type.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/ChatMessageRoomRouter.java[]
+----
+
+The Spring configuration for the router example is shown in Listing 8–4. The router determines the
+outbound message destination based on the router component chatRoomRouter.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/ChatMessageRouterConfiguration.java[]
+----
+
+ChatMessage message payloads with type 'command' will be sent to the service activator chatRoomMonitor
+and message payloads with the type 'text' will be sent to the service activator chatRoomAudience. The two
+service activators are shown.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/ChatMessageAgents.java[]
+----
+
+This example router may be run with the main class shown in {Listing}.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/ChatRouterMain.java[]
+----
+
+=== Dynamic Expression-Based Routing
+
+Instead of standard routing using a @Router annotation or any one of the common implementations
+defined in the org.springframework.integration.router package, you may optionally specify a resource
+bundle–based router expression through the expression element. This enables dynamic routing that can
+be configured simply by modifying a property value in the resource bundle or properties file.
+Expression routing requires defining a bean of the type
+org.springframework.integration.expression.ReloadableResourceBundleExpressionSource. This bean
+exposes a resource bundle to your component for property extraction and requires two properties to be
+set: the basename that will hold reference to the expression, and cacheSeconds that defines how often to
+reload the resource for updates so that expressions can be modified. The
+ReloadableResourceBundleExpressionSource instance is define using Java configuration, as shown
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/dynamic/RouterExpressionsConfiguration.java[]
+----
+
+=== Recipient-List Router
+
+The recipient-list router forwards messages to a known or inferred collection of recipient channels. The
+recipient-list router may be configured using the recipient-list-router namespace element supported
+by Spring Integration. For example, you may want a recipient-list router that forwards MarketItems to
+one channel for database persistence, and another to the stock channel for dissemination to
+downstream clients listening for market data updates of a particular kind. In the Spring configuration
+shown in Listing 8–12, all messages will go to the bondRegistrar service activator representing a
+persistence endpoint, but only the messages with the type stock will go to the stockRegistrar service
+activator.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/recipient/RouterRecipientsConfiguration.java[]
+----
+
+Note that the selector-expression will default to true should the expression be un-evaluable or
+undefined. That is, if payload.type does not exist in the message being evaluated, then the expression
+will default to true. Messages will always get sent to a declared outbound channel.
+The recipient-list router may be run using the same main class as the dynamic router. Change the
+referenced Spring configuration file to router-recipientlist.xml. Only the MarketItem with the type
+stock will go to the stockRegistrar. All MarketItems will go to the bondRegistrar.he bondRegistrar.
+
+=== PayloadType Routing
+
+It is convenient to route by inference of the payload. In this case, we can assume that depening on what
+class encapsulates a payload, that routing behaviour will follow. In this router - PayloadTypeRouter - 
+we can send messages to a channel based on it's type. In the following example, we declare this behaviour.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/payload/RouterPayloadTypeConfiguration.java[]
+----
+
+=== HeaderValue Routing
+
+Like PayloadType routing, HeaderValue routing defines a route based on a specified header key's value.
+In other words, messages get routed based on header key/value mappings. A HeaderValue route is defined by 
+a key header name, and multiple combinations of value to channel mappings. The channel destination may be
+specified either directly specified in configuration or indirectly through the header value itself. The 
+following listing gives further clarity.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/payload/RouterHeaderValueConfiguration.java[]
+----
+
+*** REWORD ***
+
+Since Spring Integration 2.1, the behavior of resolving channels is more explicit. For example, if you omit the 
+default-output-channel attribute, the router was unable to resolve at least one valid channel, and any channel 
+name resolution failures were ignored by setting resolution-required to false, then a MessageDeliveryException 
+is thrown.
+
+Basically, by default, the router must be able to route messages successfully to at least one channel. If you 
+really want to drop messages, you must also have default-output-channel set to nullChannel.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/payload/RouterHeaderPayloadConfiguration.java[]
+----
+
+=== XPath Routers
+
+Define the route based on an XPath expression 
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/xpath/RouterXPathConfiguration.java[]
+----
+
+
+=== General Routing
+
+Defines routes based on logic - such as java code.
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/basic/BasicRoutingConfiguration.java[]
+----
+
+=== Route Error handling
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/RouterErrorsConfiguration.java[]
+----
+
+== Filters
+
+Filters are used to regulate the type of message traffic going to downstream components and have such
+benefits as limiting bandwidth consumption. Spring Integration enables filtering using the
+org.springframework.integration.core.MessageSelector interface that exposes a single method called
+accept. This method evaluates to a boolean based on the implementation code. Returning true will
+forward the message to the output channel. Returning false will cause the message to be dropped. In
+the example shown in Listing 8–13, a simple MarketItemFilter filter is defined to only accept stock type
+of MarketItem with the type stock.
+
+=== Annotation Filter
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/filters/FilterAnnotationsConfiguration.java[]
+----
+
+=== Splitter
+
+It is often useful to divide large payloads into separate messages with separate processing flows. In
+Spring Integration, this is accomplished by using a splitter component. A splitter takes an input message
+and splits the message into multiple messages based on custom implementation code. The resultant
+messages are forwarded to the output channel of the splitter component. For some common cases,
+Spring Integration comes with splitters that require no customization. One example is a splitter that
+allows splitting a message based on a SpEL expression, thus enabling a very powerful expression-based
+splitter.
+An application of a splitter could be to handle an incoming message with multiple properties where
+each of the properties needs to be processed by different downstream components. The configuration of
+this example is shown in Listing 8–22.
+
+=== Collection Splitters
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/splitter/CollectionsSplittersConfiguration.java[]
+----
+
+The Java code is similar to the routers and filters, except that the return type of the method
+annotated by the @Splitter annotation is of type java.util.Collection<Field>. The incoming message
+with MarketItem as a payload will be split into a collection of messages with the individual Field
+instances as the payload. An example of a splitter implementation is shown in Listing
+
+=== Reactive Stream Splitters
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/splitter/ReactiveSplittersConfiguration.java[]
+----
+
+== Aggregator
+
+An aggregator is the inverse of a splitter: it combines any number of messages into one and sends it to
+the output channel. An aggregator collects a series of messages (based on a specified correlation
+between the messages) and publishes a single message to the components downstream.
+Suppose that you are about to receive a series of messages with different information about a
+product, but you do not know the order in which the messages will come and when they will come. In
+addition, some of the message data is volatile (such as price). This is similar to a market feed system
+where the data of known products is always changing, thus maintaining an up-to-date snapshot for use
+in purchasing is of utmost importance. The purchaser can’t bid until she’s satisfied with a price. An
+aggregator facilitates this scenario by enabling the piecemeal construction of the datasets.
+A common aggregation strategy concern is how to determine when all aggregates are received and
+when to commence the aggregation process. Spring Integration provides a few common methods to
+determine how many messages to read before aggregating the results. By default, the Spring Integration
+aggregator uses the class org.springframework.integration.aggregator.SequenceSizeReleaseStrategy
+that simply determines completion based on the total number of message received with the same
+CORRELATION_ID and unique SEQUENCE_NUMBER versus the SEQUENCE_SIZE message header. The default
+header value is provided by the splitter, although there is nothing preventing you from creating the
+header values yourself to determine how many messages the aggregator should look for and the index of
+the message relative to the expected total count (e.g., 3 of 22).
+The next concern is how message groups are identified. There are many techniques available for
+Spring Integration to use to correlate incoming messages. Spring Integration provides a default
+correlation strategy using
+org.springframework.integration.aggregator.HeaderAttributeCorrelationStrategy. This correlation
+strategy uses the value of the header CORRELATION_ID to determine if the messages are part of the same
+group.
+
+
+[source,java,indent=0]
+----
+include::{code}/messageflows/src/main/java/tdgsi/aggregator/AggregatorConfiguration.java[]
+----
+
+=== Maintaining MessageGroup state
+
+Aggregators bear the responsibility for holding a reference to every un-released message within a
+message group in memory. This is the behavior when using the default
+org.springframework.integration.store.MessageGroupStore implementation
+org.springframework.integration.store.SimpleMessageStore. SimpleMessageStore uses a java.util.Map
+implementation to store messages. Spring Integration also provides the
+org.springframework.integration.jdbc.JdbcMessageStore that allows persisting message data in
+relational databases. Since the messages are maintain in a database, they are not lost if, for whatever
+reason, the Spring Integration application were to go down. In addition, the integration process could be
+spread across several instances since the state is maintained in an external database. This will be
+discussed in more detail in Chapter {Chapter}.
+
+=== Customizing Aggregation Release strategy
+
+Aggregation algorithms compute the condition when all the messages are present; in other words, if the
+all the attributes of a product such as current price, producer, and name are available, this signals that
+the message group is ready for aggregation. Spring Integration exposes this functionality through the
+org.springframework.integration.ReleaseStrategy interface that contains the canRelease method. It is
+used to determine when the aggregation process code can proceed. In most use cases, when defining a
+custom release strategy, it is not necessary to override the canRelease method directly. Instead, you can
+implement a @ReleaseStrategy annotated method in any POJO to return true when the aggregation can
+take place.
+An example of a custom release strategy is shown in Listing 8–35. The release strategy method takes
+a collection of Field instances and checks if all properties are present. When this condition is met, the
+method returns true. The custom logic uses a bitmask approach.
+
+== Resequencer
+
+Sometimes part of a process chain will take an inordinate amount of time to complete message delivery
+while other related messages moving through a different part of the process will finish quickly. In order
+to guarantee that delivery of messages is in a particular order, perhaps because of some business rule
+such as in an auction house or stock-market bid system where message order is important, a
+resequencer may be used to insure that messages order is preserved.
+A resequencer provides a way to insure that messages remain in sequence as determined by the
+value of the message header SEQUENCE_NUMBER. When out-of-sequence messages are encountered, they
+are held in a MessageGroupStore until a message is received that fulfills the sequence. A resequencer may
+go a step further and hold all messages until the entire sequence is fulfilled. Either way, Spring
+Integration exposes resequencing strategies in one simple configuration element, the resequencer. In
+addition, a release strategy may be specified through the release-partial-sequence attribute that, when
+set to true, will send the messages as soon as they are available. The default value is false, which means
+that the messages are sent only after all have arrived. In addition, messages that linger too long may be
+dropped thanks to the discard-channel attribute.
+Here’s a simple example that sends an out-of-sequence set of messages with the payload Bid. Bid is
+a simple domain object shown in Listing 8–37. This class has two properties: a date and int value for the
+sequence order.
+
+*** REWORD THE FOLLOWING SECTIONS ***
+
+=== Message Handler Chain
+
+A org.springframework.integration.handler.MesssageHandlerChain is an implementation of
+MessageHandler that can be configured as a single endpoint while delegating a chain of other handlers
+such as filters, transformers, etc. This can simplify configuration when a set of handlers needs to be
+connected in a linear fashion. The MessageHandlerChain is configured through in Spring XML using the
+chain element.
+The aggregator example may be rewritten using the MessageHandlerChain, as shown in Listing 8–41.
+The Spring configuration file will work identically to the one in Listing 8–28. There is no need to create
+the intermediate message channel since Spring Integration will create anonymous channel for you.
+
+== Scatter Gather
+
+Starting with version 4.1, Spring Integration provides an implementation of the scatter-gather enterprise 
+integration pattern. It is a compound endpoint for which the goal is to send a message to the recipients and 
+aggregate the results. As noted in Enterprise Integration Patterns, it is a component for scenarios such 
+as “best quote”, where we need to request information from several suppliers and decide which one provides 
+us with the best term for the requested item.
+
+Previously, the pattern could be configured by using discrete components. This enhancement brings more convenient 
+configuration.
+
+The ScatterGatherHandler is a request-reply endpoint that combines a PublishSubscribeChannel
+ (or a RecipientListRouter) and an AggregatingMessageHandler. The request message is sent to the scatter 
+channel, and the ScatterGatherHandler waits for the reply that the aggregator sends to the outputChannel.
+
+=== behaviour
+
+The Scatter-Gather pattern suggests two scenarios: “auction” and “distribution”. In both cases, the aggregation 
+function is the same and provides all the options available for the AggregatingMessageHandler. (Actually, the 
+ScatterGatherHandler requires only an AggregatingMessageHandler as a constructor argument.) See Aggregator for 
+more information.
+
+==== auction
+
+The auction Scatter-Gather variant uses “publish-subscribe” logic for the request message, where the “scatter” 
+channel is a PublishSubscribeChannel with apply-sequence="true". However, this channel can be any MessageChannel 
+implementation (as is the case with the request-channel in the ContentEnricher — see Content Enricher). However, 
+in this case, you should create your own custom correlationStrategy for the aggregation function.
+
+==== distribution
+
+The distribution Scatter-Gather variant is based on the RecipientListRouter (see RecipientListRouter) with all 
+available options for the RecipientListRouter. This is the second ScatterGatherHandler constructor argument. If
+you want to rely on only the default correlationStrategy for the recipient-list-router and the aggregator, you should
+specify apply-sequence="true". Otherwise, you should supply a custom correlationStrategy for the aggregator. 
+Unlike the PublishSubscribeChannel variant (the auction variant), having a recipient-list-router selector option 
+lets filter target suppliers based on the message. With apply-sequence="true", the default sequenceSize is supplied, 
+and the aggregator can release the group correctly. The distribution option is mutually exclusive with the auction 
+option.
+
+For both the auction and the distribution variants, the request (scatter) message is enriched with the 
+gatherResultChannel header to wait for a reply message from the aggregator.
+
+By default, all suppliers should send their result to the replyChannel header (usually by omitting the 
+output-channel from the ultimate endpoint). However, the gatherChannel option is also provided, letting suppliers 
+send their reply to that channel for the aggregation.
+
+== Thread Barrier
+
+Sometimes, we need to suspend a message flow thread until some other asynchronous event occurs. For example, 
+consider an HTTP request that publishes a message to RabbitMQ. We might wish to not reply to the user until the
+ RabbitMQ broker has issued an acknowledgment that the message was received.
+
+In version 4.2, Spring Integration introduced the <barrier/> component for this purpose. The underlying
+ MessageHandler is the BarrierMessageHandler. This class also implements MessageTriggerAction, in which a 
+ message passed to the trigger() method releases a corresponding thread in the handleRequestMessage() method 
+ (if present).
+
+The suspended thread and trigger thread are correlated by invoking a CorrelationStrategy on the messages. When 
+a message is sent to the input-channel, the thread is suspended for up to requestTimeout milliseconds, waiting 
+for a corresponding trigger message. The default correlation strategy uses the 
+IntegrationMessageHeaderAccessor.CORRELATION_ID header. When a trigger message arrives with the same correlation, 
+the thread is released. The message sent to the output-channel after release is constructed by using a 
+MessageGroupProcessor. By default, the message is a Collection<?> of the two payloads, and the headers are
+ merged by using a DefaultAggregatingMessageGroupProcessor.
+
+
+The requires-reply property determines the action to take if the suspended thread times out before the trigger 
+message arrives. By default, it is false, which means the endpoint returns null, the flow ends, and the thread 
+returns to the caller. When true, a ReplyRequiredException is thrown.
+
+You can call the trigger() method programmatically (obtain the bean reference by using the name, barrier.handler — 
+where barrier is the bean name of the barrier endpoint). Alternatively, you can configure an
+ <outbound-channel-adapter/> to trigger the release.
+
+*** DEMO ***
+
+Depending on which one has a message arrive first, either the thread sending a message to in or the thread 
+sending a message to release waits for up to ten seconds until the other message arrives. When the message is 
+released, the out channel is sent a message that combines the result of invoking the custom MessageGroupProcessor 
+bean, named myOutputProcessor. If the main thread times out and a trigger arrives later, you can configure a discard 
+channel to which the late trigger is sent.
+
+== Summary
+
+*** REWORD ***
+
+In this chapter, you learned that there are several components available for controlling message flows in
+Spring Integration: message routers determine which downstream channel or channels should receive
+the message next or at all; message filters decide if the message should be passed to the output channel
+or not; message splitters break a message into several messages to be processed independently; the
+message aggregator combines several messages into a single message; and resequencers release
+messages in a specific order. You have looked at message chain handlers that simplify configuration for a
+linear sequence of endpoints and message bridges that connect two message channels or adapters.
+Finally, you’ve contemplated the times when state must be maintained in an integration, potentially
+requiring a workflow, and you have explored how Spring Integration may be used with a workflow
+engine.
