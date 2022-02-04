@@ -31,6 +31,14 @@ include::chapters/action.adoc[]
 
 include::chapters/bootstrap.adoc[]
 
+include::chapters/techover.adoc[]
+
+include::chapters/channels.adoc[]
+
+include::chapters/flowsroutes.adoc
+
+include::chapters/transformers.adoc
+
 
 [acknowledgements]
 include::chapters/acknowledgements.adoc[]

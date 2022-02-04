@@ -1,0 +1,289 @@
+[[Transformers]]
+= Message Transformations
+
+One approaches integration so that two or more applications may share services and data. One of the
+key challenges of integration is that the underlying data models of any two given applications are likely
+different, or incompatible. The various properties of, say, a customer record, can vary for a simple field
+such as an address. Some applications define the complete address as a single property, and others
+break down the address into the street number, street, city, state, zip code, and so on. In addition, the
+exchange format of the record itself may be incompatible: system A might expect a serialized Java object,
+and system B might expect an XML-encoded record or some other serialization. An integration platform
+should be able to adapt messages as required by consumers. Care should be taken that data is of as high
+fidelity as possible when moving from system to system. To support an extensible framework for data
+transformation, integration platforms support transformation.
+A message used to support communication between the integration endpoints typically consists of
+two parts: the payload, which is the actual data being sent, and the header, which is used for information
+supporting the housekeeping tasks or service support required for the messaging service. In addition to
+providing support for transforming the message payload, there is often a need to add header data—to
+enrich it with—metadata required to support processing by downstream components.
+Transformation is ideal when adapting data from one system to another, usually when the
+interchange is conceptually common, but different with regard to implementations among the multiple
+systems. On a small scale, this approach works fine: two transformations are required for a single,
+bidirectional connection. Things quickly become untenable as more systems are added, however; in the
+worst case, for every new system added, a connection (and transformation) between it and every other
+system is required. This quickly becomes nightmarishly tedious! Metcalfe’s Law states that the value of a
+network is proportional to the square of the number of connected users in the system, and describes
+quadratic growth. A common way to reduce this complexity is to have a central node mediate
+communication on behalf of all the other nodes; all nodes need only to be adapted to send messages to,
+and receive messages from, this central node. The central node in turn routes to all other nodes. This is
+where the canonical data model pattern is most effective.
+For those coming to Spring Integration from other products, the fact that Spring Integration itself
+doesn’t mandate a canonical data model might be surprising. Spring Integration makes no assumptions
+about how messages travel inside the framework. A message might not ever leave the JVM, so there is no
+need for their payload be serialized in some form. Messages might not even live outside of a transaction,
+so there’s no requirement that they even be marshalled, necessarily. Inbound adapters will often deliver
+messages with payloads specific to the inbound adapter; the inbound channel adapter in the file
+namespace, for example, delivers messages of type java.io.File, and must be transformed as required
+to something else. Outbound adapters, in the same way, will expect inbound message payloads to be of a
+known type, and will fail to work if this expectation isn’t met. The framework provides several built-in 
+transformers, and the ability to write your own, to meet these requirements.
+
+== Canonical Data models
+
+When describing message shapes between systems, there seems to be specific fields or properties supported
+by majority consuming servies. Conversely, there are also fields which may not make sense to some services. This 
+disparity is the reason why we would quantify messages by their shared relationship within a given system. 
+Therefore, a canonical data model is a data structure that is agreed upon or contracted to be used for passing an object 
+- such as a user - across an enterprise workflow. 
+
+In the representation shown below, various representations of a user are transformed into the canonical model.
+Thus, all interested services will be able to communicate, and perform their desired tasks since all are using
+the canonical data model. Additionally, these endponits will not need to know about the other internal data
+structures - of course - because everything will be converted into the canonical format.
+
+.The Canonical Data Model
+image::{images}/transformation/the-canonical-data.png[alt=The Canonical Data Model]
+
+.Canonical Data Model Representation of a User
+[source,java,indent=0]
+----
+include::{code}/transformation/includes/user.java[Canonical Data Model Representation]
+----
+
+
+== Spring Integration Transformer Options
+
+To support message conversion or transformations, Spring Integration has the concept of a message
+transformer. This allows the message payload to be modified using a Spring bean. A transformer, like
+most Spring Integration components, accepts an input channel for the incoming message and an output
+channel for the modified message.
+
+*** NOTE ***
+Spring Integration Transformers primarily operate on the payload of a given message. Although it is warranted
+to sometimes change the Headers too. We will see in a later section dedicated to Header Enrichment and Filtering 
+in order to get a better idea of how that can happen.
+
+=== Code Defined Transformations
+
+Spring Integration makes it easy to define custom transformation logic through the @Transformer annotation attached to methods and accepts both payload/header or Messag
+types as arguments. Return types may specified as either payload or Message only. The following example shows a custom message
+transormation in action using annotations:
+
+.The Mapper Transformation Class
+[source,java,indent=0]
+----
+include::{code}/transformation/MapperTransform.java[Mapper Transformation Class]
+----
+
+The above scenario describes a transformer that accepts a Map<String,String> on input channel then emits a User
+object to the output channel. The execution path for this sample includes the main class that sends a Map to the input
+channel, and polls the output channel for the resultant User object. The result of the execution is shown below.
+
+.Result of Running the Custom Transformer
+[source,java,indent=0]
+----
+include::{code}/transformation/includes/MapperTransform.txt[Custom Transformer Output]
+----
+
+As described earlier, the transformer method input parameter types and return valuesmay be specified as parameter arguments.
+These arguments can have the following composition
+
+* org.springframework.messaging.Message
+
+* The payload type of the incoming Message, as seen in the preceeding example
+
+* The header values separetly, or the entire header Map using @Header or @Headers annotation, respectively.
+
+The return value may be any type, and will be sent to the output channel as the payload of the message, with the exceptions:
+
+* If the return type is Message, it will be sent to the output channel as the Message type
+
+* If the return type is a Map, and the input payload was not a Map, then the Map entries will be added to the incoming message header Map using String key and values.
+
+* The transformer cannot return a null. Returning null results in an exception because transformation always requires an output. Use a filter or Service-activator which allows null behaviour on output instead.
+
+=== Built-In Transformers
+
+The core of Spring Integration comes with several transformer implementations. It also supports extensions such as 
+the file support which deals with reading, writing, and transforming files. There are over a dozen out-of-the-box 
+transformers included with the core of Spring Integration. Some of these are:
+
+* Syslog-to-Map
+
+* Map-to-Object
+
+* Json-to-Object
+
+* Object-to-Json
+
+* Payload-serializing
+
+* Payload-deserializing
+
+* Object-to-String
+
+* Payload-type-converting
+
+And More. In the next few sections, we will review some of the common and immediately useful ones for our example.
+
+=== Object-to-String Transformer
+
+The most simple operation of converting an object to a string comes in form of a dedicated transformer. One might need to convert a message into a file (via file outbound adapter), for example. Note that this works best when an Object's toString() method works consistently as intended.  A demonstration of using this transformer is shown below.
+
+.Example of object-to-string Transformer
+[source,java,indent=0]
+----
+include::{code}/transformation/ObjectToStringTransformer.java[Object to String Transformer]
+----
+
+The message payload coming into the input channel is converted into a string using toString() of the incoming object and sends the payload to the output channel.
+
+=== Object-to-Map and Map-to-Object Transformers
+
+Another common situation is when an endpoint receives or emits a Map representation for some Object. This both simplifies the canonical data model solution as described earlier, and eliminates the need to serialize object data when sending it via a JMS message.
+Spring Integration provides the object-to-map transofrmer and map-to-object transformer to support this use-case. 
+Functionally, the Object graph is reduced to the most primiteive types (String, long, double, etc..). 
+The Map is based on JSON conversion and the key is described in SpEL notation while primitive data becomes the value.
+
+.Example of object-to-map and map-to-object Transformers
+[source,java,indent=0]
+----
+include::{code}/transformation/ObjectToMapTransformer.java[Object to Map to Object Transformer]
+----
+
+By default, when a Map output is flattened it's nested Collection types are enumerated in their output (e.g. property[n]=value ). If you want to create a structured map, you can set the 'flatten' setting to false.
+The output created with a flattening mapper will nest each collection such as `property = {key=foo, nextKey=[foo, bar, ... ]}`.
+
+=== Stream transformers
+
+Another common usage for transformers is converting a message payload into a byte[] array or a String (if charset is sent with the configuration).
+
+The following example demonstrates the functionality of stream-stransformer.
+
+.Example of stream Transformer
+[source,java,indent=0]
+----
+include::{code}/transformation/StreamTransformer.java[Object to String and bytes]
+----
+
+This example shows usages for converting payloads into both byte[] array's, and converting the payload into a String by passing in the charset parameter.
+
+=== JSON transformers
+
+JSON is as common data format, given many HTTP/ReST services use it. Spring Integration comes with two transformers,
+object-to-json and json-to-object, which convert objects into their JSON representation and in reverse from JSON to the object, respectively.
+The following examples show how to declare object-to-json and json-to-object transformers.
+
+.Example of object-to-json and json-to-object Transformers
+[source,java,indent=0]
+----
+include::{code}/transformation/ObjectJsonTransformers.java[Object to JSON to Object Transformer Usages]
+----
+
+The payload sent to the input channel of the object-json transformer, gets converted into JSON then that output is sent into the input channel of the json-object transformer which turns the JSON text into the (same type) object.
+
+==== Customizing the JSON transformation process
+
+Internally, this transformer uses the `JsonObjectMapperProvider` factory to obtain a Jackson 2 JSON-processor (Jackson2JsonObjectMapper). If the Jackson library is not present, then another JsonObjectMapper implementation can be used.
+
+To select a different JsonObjectMapper, simply define an 'ObjectMapperFactory' or bean of type JsonObjectMapper and configure with required characteristics as shown below.
+
+.Custom ObjectMapper Configuration
+[source,java,indent=0]
+----
+include::{code}/transformation/config/CustomObjectMapperConfiguration.java[Customize a Jackson2JsonObjectMapper]
+----
+
+=== JSON Message Headers
+
+Spring Integration makes use of JSONHeaders to determin the types of object that json-to-object and object-to-json will convert from/to. Because generics are used in many cases, it is feasable to 
+construct a message acceptor/emitter that resolved generic arguments. The following example shows how using ResolvableType works for a variety of generified object payloads.
+
+.Generified Object Conversions (Json to and from object)
+[source,java,indent=0]
+----
+include::{code}/transformation/GenericJSONConversion.java[Customize conversion for use with heavily generified types]
+----
+
+Spring Integration also considers JSON payloads with special content-type headers. By default, Spring Integration considers messages having this header set to 'application/json'.
+You can suppress this by setting 'content-type' attribute to an empty string, however the input message header will override this setting.
+
+=== Payload-serializing and Paylod-deserializing Transformers
+
+The payload-serizing and payload-deserializing transformers perform symmetric serializing an object to a byte array and deserializing the byte array back into an object.
+This transoformer is useful for message paths that require serialized bytecode such as JMS adapters. An example of using this transformer is shown below.
+
+.Example use of payload-serializing and payload-deserializing transformers
+[source,java,indent=0]
+----
+include::{code}/transformation/PayloadSerialization.java[Payload Serializing and Deserializing transformers]
+----
+
+You can provide an implementation of Spring Serializer or Deserializer strategies if you require special handling. For example you may want to use BSON as shown in the example
+
+.Example use of alternate serialization/deserialization strategies
+[source,java,indent=0]
+----
+include::{code}/transformation/PayloadSerializationBSON.java[Payload Serializing and Deserializing transformers using BSON as strategy]
+----
+
+=== Syslog transformers 
+
+*** TODO: CREATE SAMPLE AND TEXT ***
+
+One useful and commonly used kind of transformer is a syslog transormer.  This transformer takes RFC3164 formatted packets - from a syslog daemon - from it's input channel and produces Map data having key/value pairs to the output channel.
+If the received packet cannot be decoded, then a Pair is emitted with Key 'UNENCODED' and value containing the String representation of the SysLog line.
+
+The next example shows the use of Syslog Transformer, but replaces the actual SysLog network daemon with static SysLog packet emitter.
+
+.Example of SysLog Transformer
+[source,java,indent=0]
+----
+include::{code}/transformation/SyslogTransformer.java[Syslog network packet transformer]
+----
+
+=== Message Header Transformations
+
+Spring Integration can augment or enrich header information. The `HeaderEnricher` transformer provides a simple means to add additional header entries to a message.
+For example, the value 42 may be added to the key count, and an instance of the User object may be added to the key headerBean within the headerMap using header-enricher.
+The following example shows how a count might be used as an index of the message for removing duplicate messages, or for potentially correlating more than one message.
+
+.Example of Header Enricher
+[source,java,indent=0]
+----
+include::{code}/transformation/HeaderEnricher.java[Header Enricher Example]
+----
+
+This example follows an input message through an integration flow containing header filters, where the key 'FIRST' is filtered out. Then the headers are enriched 
+through the DSL that populates the `MessageTransformationHandler` to add the 'Third' header key/value. 
+
+== Claim Check 
+
+== Transformation with SpEL expression
+
+== Codec-Based transformers
+
+=== Kryo
+
+=== Avro
+
+== Summary
+
+This chapter covered how Spring Integration supports transformations, allowing the message payload to
+be modified to the format and structure required by the downstream endpoint. A number of examples
+were given, showing the built-in transformation support for Map, JSON, and XML messages, as well as
+object serialization. A simple integration example was given, demonstrating how easy it is to transform
+the message payloads as required for the different endpoints that may be encountered in real situations.
+In addition, Spring Integration supports augmenting and modifying the message header values as
+required for supporting downstream message handling and endpoint requirements. Several examples
+were shown demonstrating Spring Integration support for modifying the message header.

@@ -12,7 +12,7 @@ As the most common of components, there is data. A Message is the most basic abs
 .A message composition diagram.
 image::{code}/techover/the-message.png[alt=The Message]
 
-** DO's and Dont's**
+** DO's and Dont's **
 
 Messages shall contain just enough data to be useful within the boundry of such system which produced it. Additional inferences should be made 
 by downstream components which 'enrich' (see later) data as needed by further downstream components. This is because sometimes, not all data is needed at once. 

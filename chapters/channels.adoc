@@ -1,0 +1,119 @@
+[[Channels]]
+= Message Channels
+
+Message Channels represent the virtual data pipe that connects two or more endpoints. It is generalized to think of this as connective logic to an endpoint in 2 modes: sender and receiver.
+The message channel decouples the sender and receiver so that the receiver does not know who sent the message and likewise the sender does not know of the message recipient.
+Enterprise Integration Patterns breaks channels into two major types: point-to-point channels and publish-subscribe channels. An application developer will select the kinds of channels used 
+in order to control the behavior of how messages get sent and received. Thus, Spring Integration simplifies development of message channels with it's implementation of EIP messaging concepts.
+
+== EAI Message Channel Patterns
+
+The message channel design pattern allows a message to hold a piece of information that gets passed between different service components, which can either be in a process or across different applications in different datacenters.
+For example, a retail store's inventory system can send a message describing low inventory on a certain item (e.g. 'store:12345','item:99999','count:0') to the corporate warehouse so that it can send more of this deficient item back to the store.
+Payloads can be whatever your organization may choose, the messaging channels do not necessarily have to participate in the payload description, however that is an option discussed later in this chapter
+
+The message endpoints are the components that interact with the messages. The endpoint that sends messages to the message channel is called the producer or sender. The receiving endpoint is called the receiver or consumer.
+The producer puts data into a message and the receiver takes the data from the message and performs some actions with it. As a result, it is important to align data payloads between channels and endpoints. Aside from standard consumer/producer stereotypes, 
+a message endpoint may filter messages within a channel, route messages to other channels, and/or augment the message with additional data (such as authorizations).
+In some cases, it may be needed to provide long term aggregation and short term splitting logic. The former consumes messages until some condition is met in which a summary gets sent to the receiving channel, whereas the latter
+can split a message into multiple messages and route them into different channels.
+
+The message channel connects the endpoints together. Messages are produced and sent to be received by one or more consumers depending on the type of channel.
+The channel ensures that the messages can be sent and received between endpoints in a manner consistent with application needs. Sometimes this means that a channel 
+stores messages into an internal long-term storage block such as a database or even persistent queue. Since it is application data that is encapsulated within the message, the channel does not need to understand
+payload. In other words, the message channel design pattern is meant to decouple the producer from the consumer.
+
+In order to make interaction between endpoints intuitive to the developer, each message channel has a unique string label, making each channel appear as a logical address.
+Enterprise Integration Patterns describe serveral different kinds of channels that have a variety of effects with regards to message handling. We will take a look at these in the next sections.
+
+=== Point-to-Point Channel
+
+A point-to-point channel (see Figure ###) ensures that there is only one consumer that receives the same message from the sender at any given time. Spring Integration provides several types of point-to-point channel implementations:
+`QueueChannel`, `PriorityChannel`, `RendezvousChannel`, `DirectChannel`, `ExecutorChannel`, and `NullChannel`.
+
+.Point-to-Point Channel
+image::{code}/channels/point-to-point.png[alt=The Point to Point Channel]
+
+=== Publish-Subscribe Channel
+
+The publish-subscribe channel (see Figurre ###) allows one-to-many relationship between the producer
+and consumer, such that multiple consumers may receive the same message. The message is marked as
+“received” and removed from the channel when all the subscribed receivers have consumed the
+message. Publish-Subscribe implementation may even have a 'fire-and-forget' semantic which means there could
+be no one listening to the message that was sent. Spring Integration currently provides a publish-subscribe–style message channel
+implementation, which is PublishSubscribeChannel. 
+
+.Publish-subscribe Channel
+image::{code}/channels/publish-subscribe.png[alt=The Publish Subscribe]
+
+=== Data-Typed Channel
+
+Applications can use the message channel to transfer different types of data between the message producer and consumer. In order to process the message correctly,
+consumers need to have knowledge about the message payload data type. The consumer needs to determine the object type in order to apply proper business logic to handle the message.
+Usually, this means hinting the consumer with a header that indicates the data type. This translates into a scenario where producer sends object type A and type B through the same channel.
+
+However, a consumer may only be able to process one type of data. Such a processor for example may only take type A, while anoanother can take type B.
+A message channel that only contains single type of objects or messages is called a data-typed channel. This approcach solves the problem of breaking
+down data types by router or filter and allows a direct 1:1 relationship for producer-channel and consume-channel.
+An example of a channel that can handle different data types of data, and a `data-type` channel is shown in figure ###.
+
+.Data-Typed Channel
+image::{code}/channels/data-typed.png[alt=The Data Typed Channel]
+
+=== Invalid Message Channel
+
+A message may not be processable by a message processor, or it fails validation for some reason - perhaps it is an object C of which only A and B are recognized.
+This message will then get routed into the invalid message channel (see Figure ###), allowing further handling by the other processors/application components. 
+In Spring Integration, the validation would be done by a message filter, which is discussed more in depth in Chapter ###.
+
+.Invalid Message Channel
+image::{code}/channels/invalid.png[alt=The Invalid Message Channel]
+
+=== Dead Letter Channel
+
+When an application fails to deliver a message to the channel after all retry attempts, the message will be sent to the dead letter channel and will be handled further by another process or application listening for messages on that channel (see Figure ###).
+
+.Dead Letter Channel
+image::{code}/channels/dead-letter.png[alt=The Dead Letter Channel]
+
+=== Channel Adapter
+
+The channel adapter allows 
+
+=== Messaging bridges
+
+=== Message Bus
+
+=== Guaranteed delivery
+
+== Choosing a Spring Integration Channel Implementation
+
+=== Point-to-Point Channel
+
+==== DirectChannel
+
+==== PollableChannel
+
+==== QueueChannel
+
+==== PriorityChannel
+
+==== RendezvousChannel
+
+==== ExecutorChannel
+
+=== Publish-SubScribe Channel
+
+==== SubscribableChannel
+
+==== PublishSubscribeChannel
+
+=== FluxMessageChannel
+
+=== ScopedChannel
+
+== Channel Interceptors
+
+== MessagingTemplate
+
+== Configuring Message Channels
