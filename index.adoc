@@ -35,9 +35,9 @@ include::chapters/techover.adoc[]
 
 include::chapters/channels.adoc[]
 
-include::chapters/flowsroutes.adoc
+include::chapters/flowsroutes.adoc[]
 
-include::chapters/transformers.adoc
+include::chapters/transformers.adoc[]
 
 
 [acknowledgements]
