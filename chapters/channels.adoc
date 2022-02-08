@@ -78,23 +78,81 @@ image::{code}/channels/dead-letter.png[alt=The Dead Letter Channel]
 
 === Channel Adapter
 
-The channel adapter allows 
+A channel adapter is a message endpoint that allows an integration application to connect externally with messaging semantics. Spring Integration providesfor a variety of channel adapters that bind to transports such as JMS, HTTP, SMTP, FileSystem and others.
+Additionally, Channel Adapters come in two modes: in-bound and out-bound for consuming and producing externally bound messages respectively. By using a common interface or application programming interface(API), applications can be easily integrated with 
+external systems.
 
-=== Messaging bridges
+.Channel Adapter
+image::{code}/channels/channel-adapter.png[alt=The Channel Adapter]
 
-=== Message Bus
+=== Messaging bridge
+
+The messaging bridge allows a channel to take the characteristics of another channel. For example, the developer may want to connect a `PollableChannel` to a `SubscribableChannel` so that the subscribing endpoints don't have to worry about polling configuration. Instead, the messaging bridge provides the polling support. Messaging bridges can simplify the setup 
+of application data transformations across system boundaries by including a transformer with the in/out channel of a bridge configuration.
+
+.Messaging Bridge
+image::{code}/channels/messaging-bridge.png[alt=The Messaging Bridge]
 
 === Guaranteed delivery
 
+Messages are normally stored in memory and wait for delivery by the messaging system. If the message system crashes, all the messages will be lost. In order to guarantee the delivery, the messaging system can use a data store to persist the messages. By default, all the Spring Integration channels store messages in memory. However, message channels cna be backed by a JMS broker, which in turn stores messages in that broker's persistence store instead of application memory.
+Message channels are just another strategy interface and can be tailored to your specific needs as required; implementations can be built that delegate to any data store conceivable using the `MessageStore` interface or - for more control - by implementing the `MessageChannel` interface itself.
+
 == Choosing a Spring Integration Channel Implementation
+
+All Spring Integration message channels implement the `org.springframework.messaging.MessageChannel` interface as shown below. This interface defines how a producer sends a message to the channel. This is required since different types of message channel implementations operate in different ways. Depending on the type of message channel implementation, the send operation can block indefinitely or for a given timeout until the message is received.
+
+.MessageChannel.java
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdgsi/channels/MessageChannel.java[]
+----
+
+As hinted upon earlier, Spring Integration applies message channel design in two implementations based on established EIP pattern principles: 
+`org.springframework.messaging.PollableChannel` and `org.springframework.messaging.SubscribableChannel`. Both of the implementations are unique subinterfaces of the `MessageChannel` interface.
+
+`PollableChannel` (see listing ###) defines a receiver that periodically poll for messages from the channel. The consumer can choose to wait indefinitely or for a given timeout until a message arrives.
+
+.PollableChannel.java
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdgsi/channels/PollableChannel.java[]
+----
+
+The alternative way to receive messages is by using the `SubscribableChannel`, which allows the sender to push the message to 0 or more subscribed receivers. When the sender sends a message, the subscribed receiver(s) will receive the message and process it by the provided `org.springframework.messaging.MessageHandler`. Once a message has been sent to the channel, all subscribed message handlers will be invoked.
+
+.SubscribableChannel.java
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdgsi/channels/SubscribableChannel.java[]
+----
+
+The `MessageHandler` interface contains only one method, which will handle the pushed messages from the `SubscribableChannel` channel. The interface also throws `org.springframework.messaging.MessagingException` depending on the message channel implementation, each exception may be handled differently (such as failover and retry). As a result, it is always a good idea to throw the appropriate exception for the given cause.
+
+.MessageHandler.java
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdgsi/channels/MessageHandler.java[]
+----
 
 === Point-to-Point Channel
 
-==== DirectChannel
-
-==== PollableChannel
+Spring Integration provides several different implementations of the point-to-point channel pattern. Lets look at the different point-to-point channel options.
 
 ==== QueueChannel
+
+The `QueueChannel` class is the simplest implementation of the `MessageChannel` interface. `QueueChannel` has point-to-point semanteics. In other words, even if the channel has multiple consumers, only one of them will receive any message sent to that channel. `QueueChannel` also provides a mechanism to fiter and purge messages that satisfy certain criteria. Additionally, `QueueChannel` stores all messages in memory since it wraps a queue internally. 
+By default, `QueueChannel` can use all the available memory to store messages. To avoid running out of memory, `QueueChannel` provides a constructor that accepts the queue capacity.
+
+By specifying a message limit, the sender may block until room is available in the queue. Alternately, you can specify a timout parameter on the `send(Message)` method to 
+
+==== DirectChannel
+
+The channel implementation considered 'default' is the `org.springframework.integration.channel.DirectChannel` - a mixture of point-to-point and publish-subscribe channels. It uses the publish-subscribe pattern so the message will be pushed to the consumer, but only one consumer can receive the same message at any given time. As a result, `DirectChannel` is actually a point-to-point channel.
+Figure ### shows a comprehensive class hierarchy of the subclasses of `MessageChannel` that compose `DirectChannel`.
+
+.Direct Channel Class Diagram
+image::{code}/channels/DirectChannelClassDiagram.png[alt=Direct Channel Class Diagram]
 
 ==== PriorityChannel
 
