@@ -231,8 +231,41 @@ Here we will take a small sample of each of our point-to-point implementations a
 
 === FluxMessageChannel
 
+This reactive `FluxMessageChannel` should be used to bridge Reactive streams into Integration workflows. This channel does not implement either of the two Spring Integration MessageChannel subclasses `SubscribableChannel` or `PollableChannel` meaning one must 
+use this only in conjunction with other `FluxMessageChannel` or as to bridge a `org.reactivestreams.Publisher` with the Integration Flow.
+
+.FluxMessageChannel Class Diagram
+image::{code}/channels/FluxMessageChannelDiagram.png[alt=Flux Message Channel Class Diagram]
+
 == Channel Interceptors
+
+Spring Integration provides the ability to intercept the messages at specific stages around the `MessageChannel`'s send and receive operations. This is where the `ChannelInteceptor` interface comes into play.
+This interface allows the message to be intercepted - much like AOP - before and after it is sent and/or received WITHOUT error, and finally as a completion phase whether or not an exception has occured.
+The following graphs depicts the stages of a message channel where an interceptor perofrms each of it's methods.
+
+.ChannelInteceptor Interception Diagram
+image::{code}/channels/ChannelInteceptorDiagram.png[alt=ChannelInteceptor Diagram]
+
+Since only the `PollableChannel` interface has the receive operation, `preReceive` and `postReceive` will be invoked only for `PolalbleChannel` implementations. The different available interceptor methods for the various message channesls are shown in Table ###.
+
+.Table ###. Message Channels and Interceptors
+image::{code}/channels/ChannelInteceptorInteractionDiagram.png[alt=ChannelInteceptor Interaction Diagram]
+
+One example of how this works in practice is the `WireTap` inteceptor that binds to a channel being operated on. This interceptor sends each passing message onto another `wiretap` channel as each message passes through the bound channel.
+This channel logs each message and is good for debugging testing and monitoring.
+
+=== Global Interceptors
+
+Spring Integration allows interceptors to be registered and applied to dynamically registered channels - such as at the time of definition through one of the DSL definitions or `beanFactory` initialized beans.
 
 == MessagingTemplate
 
+Spring Integration provides `MessagingTemplate` as a very easy way to integrate a messaging system into applications. It supports common message channel operations, such as send and receive. `MessagingTemplate` can support transactions by providing a `PlatformTransactionManager`. Additionally, The `MessagingTemplate` can build Spring Integration `Message` instances.
+
 == Configuring Message Channels
+
+== Channel persistence
+
+== Summary
+
+Spring Integration is inspired by `Enterprise Integration Patterns`. This chapter has looked at how Spring Integration implements the message channel pattern. By providing various implementations of the point-to-point message channel and publish-subscribe channels, applications can communicate by sending message with each other in a non-invasive manner. The message operations can be shared in multiple threads, or only exist on the local thread.
