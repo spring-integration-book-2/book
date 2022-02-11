@@ -28,7 +28,7 @@ Enterprise Integration Patterns describe serveral different kinds of channels th
 
 === Point-to-Point Channel
 
-A point-to-point channel (see Figure ###) ensures that there is only one consumer that receives the same message from the sender at any given time. Spring Integration provides several types of point-to-point channel implementations:
+A point-to-point channel (see Figure $$$) ensures that there is only one consumer that receives the same message from the sender at any given time. Spring Integration provides several types of point-to-point channel implementations:
 `QueueChannel`, `PriorityChannel`, `RendezvousChannel`, `DirectChannel`, `ExecutorChannel`, and `NullChannel`.
 
 .Point-to-Point Channel
@@ -36,7 +36,7 @@ image::{code}/channels/point-to-point.png[alt=The Point to Point Channel]
 
 === Publish-Subscribe Channel
 
-The publish-subscribe channel (see Figurre ###) allows one-to-many relationship between the producer
+The publish-subscribe channel (see Figurre $$$) allows one-to-many relationship between the producer
 and consumer, such that multiple consumers may receive the same message. The message is marked as
 “received” and removed from the channel when all the subscribed receivers have consumed the
 message. Publish-Subscribe implementation may even have a 'fire-and-forget' semantic which means there could
@@ -55,7 +55,7 @@ Usually, this means hinting the consumer with a header that indicates the data t
 However, a consumer may only be able to process one type of data. Such a processor for example may only take type A, while anoanother can take type B.
 A message channel that only contains single type of objects or messages is called a data-typed channel. This approcach solves the problem of breaking
 down data types by router or filter and allows a direct 1:1 relationship for producer-channel and consume-channel.
-An example of a channel that can handle different data types of data, and a `data-type` channel is shown in figure ###.
+An example of a channel that can handle different data types of data, and a `data-type` channel is shown in figure $$$.
 
 .Data-Typed Channel
 image::{code}/channels/data-typed.png[alt=The Data Typed Channel]
@@ -63,15 +63,15 @@ image::{code}/channels/data-typed.png[alt=The Data Typed Channel]
 === Invalid Message Channel
 
 A message may not be processable by a message processor, or it fails validation for some reason - perhaps it is an object C of which only A and B are recognized.
-This message will then get routed into the invalid message channel (see Figure ###), allowing further handling by the other processors/application components. 
-In Spring Integration, the validation would be done by a message filter, which is discussed more in depth in Chapter ###.
+This message will then get routed into the invalid message channel (see Figure $$$), allowing further handling by the other processors/application components. 
+In Spring Integration, the validation would be done by a message filter, which is discussed more in depth in Chapter $$$.
 
 .Invalid Message Channel
 image::{code}/channels/invalid.png[alt=The Invalid Message Channel]
 
 === Dead Letter Channel
 
-When an application fails to deliver a message to the channel after all retry attempts, the message will be sent to the dead letter channel and will be handled further by another process or application listening for messages on that channel (see Figure ###).
+When an application fails to deliver a message to the channel after all retry attempts, the message will be sent to the dead letter channel and will be handled further by another process or application listening for messages on that channel (see Figure $$$).
 
 .Dead Letter Channel
 image::{code}/channels/dead-letter.png[alt=The Dead Letter Channel]
@@ -111,7 +111,7 @@ include::{code}/channels/src/main/java/tdgsi/channels/MessageChannel.java[]
 As hinted upon earlier, Spring Integration applies message channel design in two implementations based on established EIP pattern principles: 
 `org.springframework.messaging.PollableChannel` and `org.springframework.messaging.SubscribableChannel`. Both of the implementations are unique subinterfaces of the `MessageChannel` interface.
 
-`PollableChannel` (see listing ###) defines a receiver that periodically poll for messages from the channel. The consumer can choose to wait indefinitely or for a given timeout until a message arrives.
+`PollableChannel` (see listing $$$) defines a receiver that periodically poll for messages from the channel. The consumer can choose to wait indefinitely or for a given timeout until a message arrives.
 
 .PollableChannel.java
 [source,java,indent=0]
@@ -191,7 +191,7 @@ The channel implementation considered 'default' - and the simplest - is the `org
 The `DirectChannel` allows for a single thread to perform both sides of the channel operation - that is send and receive - in which the `MessageHandler` will invoke `handleMessage(Message)` method directly on the sender thread, before the `send()` method can return. This allows for transactions to occur across channels while still being loose coupled to the messaging system. In this way, a `send()` call within the scope of a transaction will have it's outcome determined
 by the outcome of the MessageHandler's `handleMessage(Message)` method. 
 
-Figure ### shows a comprehensive class hierarchy of the subclasses of `MessageChannel` that compose `DirectChannel`.
+Figure $$$ shows a comprehensive class hierarchy of the subclasses of `MessageChannel` that compose `DirectChannel`.
 
 .Direct Channel Class Diagram
 image::{code}/channels/DirectChannelClassDiagram.png[alt=Direct Channel Class Diagram]
@@ -246,9 +246,9 @@ The following graphs depicts the stages of a message channel where an intercepto
 .ChannelInteceptor Interception Diagram
 image::{code}/channels/ChannelInteceptorDiagram.png[alt=ChannelInteceptor Diagram]
 
-Since only the `PollableChannel` interface has the receive operation, `preReceive` and `postReceive` will be invoked only for `PolalbleChannel` implementations. The different available interceptor methods for the various message channesls are shown in Table ###.
+Since only the `PollableChannel` interface has the receive operation, `preReceive` and `postReceive` will be invoked only for `PolalbleChannel` implementations. The different available interceptor methods for the various message channesls are shown in Table $$$.
 
-.Table ###. Message Channels and Interceptors
+.Table $$$. Message Channels and Interceptors
 image::{code}/channels/ChannelInteceptorInteractionDiagram.png[alt=ChannelInteceptor Interaction Diagram]
 
 One example of how this works in practice is the `WireTap` inteceptor that binds to a channel being operated on. This interceptor sends each passing message onto another `wiretap` channel as each message passes through the bound channel.
