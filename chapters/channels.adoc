@@ -32,7 +32,7 @@ A point-to-point channel (see Figure $$$) ensures that there is only one consume
 `QueueChannel`, `PriorityChannel`, `RendezvousChannel`, `DirectChannel`, `ExecutorChannel`, and `NullChannel`.
 
 .Point-to-Point Channel
-image::{code}/channels/point-to-point.png[alt=The Point to Point Channel]
+image::{code}/channels/point-to-point-channel.jpg[alt=The Point to Point Channel]
 
 === Publish-Subscribe Channel
 
@@ -44,7 +44,7 @@ be no one listening to the message that was sent. Spring Integration currently p
 implementation, which is PublishSubscribeChannel. 
 
 .Publish-subscribe Channel
-image::{code}/channels/publish-subscribe.png[alt=The Publish Subscribe]
+image::{code}/channels/pubsub-channel.jpg[alt=The Publish Subscribe]
 
 === Data-Typed Channel
 
@@ -58,7 +58,7 @@ down data types by router or filter and allows a direct 1:1 relationship for pro
 An example of a channel that can handle different data types of data, and a `data-type` channel is shown in figure $$$.
 
 .Data-Typed Channel
-image::{code}/channels/data-typed.png[alt=The Data Typed Channel]
+image::{code}/channels/data-typed-channel.jpg[alt=The Data Typed Channel]
 
 === Invalid Message Channel
 
@@ -67,14 +67,14 @@ This message will then get routed into the invalid message channel (see Figure $
 In Spring Integration, the validation would be done by a message filter, which is discussed more in depth in Chapter $$$.
 
 .Invalid Message Channel
-image::{code}/channels/invalid.png[alt=The Invalid Message Channel]
+image::{code}/channels/invalid-message-channel.jpg[alt=The Invalid Message Channel]
 
 === Dead Letter Channel
 
 When an application fails to deliver a message to the channel after all retry attempts, the message will be sent to the dead letter channel and will be handled further by another process or application listening for messages on that channel (see Figure $$$).
 
 .Dead Letter Channel
-image::{code}/channels/dead-letter.png[alt=The Dead Letter Channel]
+image::{code}/channels/dead-letter-channel.jpg[alt=The Dead Letter Channel]
 
 === Channel Adapter
 
@@ -83,7 +83,7 @@ Additionally, Channel Adapters come in two modes: in-bound and out-bound for con
 external systems.
 
 .Channel Adapter
-image::{code}/channels/channel-adapter.png[alt=The Channel Adapter]
+image::{code}/channels/channel-adapter.jpg[alt=The Channel Adapter]
 
 === Messaging bridge
 
@@ -91,12 +91,15 @@ The messaging bridge allows a channel to take the characteristics of another cha
 of application data transformations across system boundaries by including a transformer with the in/out channel of a bridge configuration.
 
 .Messaging Bridge
-image::{code}/channels/messaging-bridge.png[alt=The Messaging Bridge]
+image::{code}/channels/messaging-bridge.jpg[alt=The Messaging Bridge]
 
 === Guaranteed delivery
 
 Messages are normally stored in memory and wait for delivery by the messaging system. If the message system crashes, all the messages will be lost. In order to guarantee the delivery, the messaging system can use a data store to persist the messages. By default, all the Spring Integration channels store messages in memory. However, message channels cna be backed by a JMS broker, which in turn stores messages in that broker's persistence store instead of application memory.
 Message channels are just another strategy interface and can be tailored to your specific needs as required; implementations can be built that delegate to any data store conceivable using the `MessageStore` interface or - for more control - by implementing the `MessageChannel` interface itself.
+
+.Guaranteed Delivery
+image::{code}/channels/guaranteed-delivery.jpg[alt=Guaranteed Delivery Pattern]
 
 == Choosing a Spring Integration Channel Implementation
 
@@ -239,8 +242,7 @@ image::{code}/channels/FluxMessageChannelDiagram.png[alt=Flux Message Channel Cl
 
 == Channel Interceptors
 
-Spring Integration provides the ability to intercept the messages at specific stages around the `MessageChannel`'s send and receive operations. This is where the `ChannelInteceptor` interface comes into play.
-This interface allows the message to be intercepted - much like AOP - before and after it is sent and/or received WITHOUT error, and finally as a completion phase whether or not an exception has occured.
+Spring Integration provides the ability to intercept the messages at specific stages around the `MessageChannel`'s send and receive operations. The `ChannelInteceptor` interface allows the message to be intercepted - much like AOP - before and after it is sent and/or received WITHOUT error, and finally as a completion phase whether or not an exception has occured.
 The following graphs depicts the stages of a message channel where an interceptor perofrms each of it's methods.
 
 .ChannelInteceptor Interception Diagram
@@ -264,7 +266,23 @@ Spring Integration provides `MessagingTemplate` as a very easy way to integrate 
 
 == Configuring Message Channels
 
+This section will focus on practical usages for each of the channel implementations discussed earlier. We will focus on configuration using JavaDSL formation. 
+
 == Channel persistence
+
+The Enterprise Integration Patterns (EIP) book identifies several patterns that have the ability to buffer messages. For example, an aggregator buffers messages until they can be released, and a QueueChannel buffers messages until consumers explicitly receive those messages from that channel. Because of the failures that can occur at any point within your message flow, EIP components that buffer messages also introduce a point where messages could be lost.
+
+To mitigate the risk of losing messages, EIP defines the message store pattern, which lets EIP components store messages, typically in some type of persistent store (such as an RDBMS).
+
+Spring Integration provides support for the message store pattern by:
+
+* Defining an org.springframework.integration.store.MessageStore strategy interface
+
+* Providing several implementations of this interface
+
+* Exposing a message-store attribute on all components that have the capability to buffer messages so that you can inject any instance that implements the MessageStore interface.
+
+Details on how to configure a specific message store implementation and how to inject a MessageStore implementation into a specific buffering component are described throughout the manual (see the specific component, such as QueueChannel, Aggregator, Delayer, and others). The following pair of examples show how to add a reference to a message store for a QueueChannel and for an aggregator:
 
 == Summary
 
