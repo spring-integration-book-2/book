@@ -3,6 +3,7 @@
 
 Message Channels represent the virtual data pipe that connects two or more endpoints. It is generalized to think of this as connective logic to an endpoint in 2 modes: sender and receiver.
 The message channel decouples the sender and receiver so that the receiver does not know who sent the message and likewise the sender does not know of the message recipient.
+
 Enterprise Integration Patterns breaks channels into two major types: point-to-point channels and publish-subscribe channels. An application developer will select the kinds of channels used 
 in order to control the behavior of how messages get sent and received. Thus, Spring Integration simplifies development of message channels with it's implementation of EIP messaging concepts.
 
@@ -15,6 +16,7 @@ Payloads can be whatever your organization may choose, the messaging channels do
 The message endpoints are the components that interact with the messages. The endpoint that sends messages to the message channel is called the producer or sender. The receiving endpoint is called the receiver or consumer.
 The producer puts data into a message and the receiver takes the data from the message and performs some actions with it. As a result, it is important to align data payloads between channels and endpoints. Aside from standard consumer/producer stereotypes, 
 a message endpoint may filter messages within a channel, route messages to other channels, and/or augment the message with additional data (such as authorizations).
+
 In some cases, it may be needed to provide long term aggregation and short term splitting logic. The former consumes messages until some condition is met in which a summary gets sent to the receiving channel, whereas the latter
 can split a message into multiple messages and route them into different channels.
 
@@ -108,7 +110,7 @@ All Spring Integration message channels implement the `org.springframework.messa
 .MessageChannel.java
 [source,java,indent=0]
 ----
-include::{code}/channels/src/main/java/tdgsi/channels/MessageChannel.java[]
+include::{code}/channels/src/main/sample/MessageChannel.java[]
 ----
 
 As hinted upon earlier, Spring Integration applies message channel design in two implementations based on established EIP pattern principles: 
@@ -119,7 +121,7 @@ As hinted upon earlier, Spring Integration applies message channel design in two
 .PollableChannel.java
 [source,java,indent=0]
 ----
-include::{code}/channels/src/main/java/tdgsi/channels/PollableChannel.java[]
+include::{code}/channels/src/main/sample/PollableChannel.java[]
 ----
 
 The alternative way to receive messages is by using the `SubscribableChannel`, which allows the sender to push the message to 0 or more subscribed receivers. When the sender sends a message, the subscribed receiver(s) will receive the message and process it by the provided `org.springframework.messaging.MessageHandler`. Once a message has been sent to the channel, all subscribed message handlers will be invoked.
@@ -127,7 +129,7 @@ The alternative way to receive messages is by using the `SubscribableChannel`, w
 .SubscribableChannel.java
 [source,java,indent=0]
 ----
-include::{code}/channels/src/main/java/tdgsi/channels/SubscribableChannel.java[]
+include::{code}/channels/src/main/sample/SubscribableChannel.java[]
 ----
 
 The `MessageHandler` interface contains only one method, which will handle the pushed messages from the `SubscribableChannel` channel. The interface also throws `org.springframework.messaging.MessagingException` depending on the message channel implementation, each exception may be handled differently (such as failover and retry). As a result, it is always a good idea to throw the appropriate exception for the given cause.
@@ -135,7 +137,7 @@ The `MessageHandler` interface contains only one method, which will handle the p
 .MessageHandler.java
 [source,java,indent=0]
 ----
-include::{code}/channels/src/main/java/tdgsi/channels/MessageHandler.java[]
+include::{code}/channels/src/main/sample/MessageHandler.java[]
 ----
 
 === Publish-SubScribe Channel
@@ -152,7 +154,8 @@ Spring Integration provides several different implementations of the point-to-po
 
 ==== QueueChannel
 
-The `QueueChannel` class is the simplest implementation of the `MessageChannel` interface. `QueueChannel` has point-to-point semanteics. In other words, even if the channel has multiple consumers, only one of them will receive any message sent to that channel. `QueueChannel` also provides a mechanism to fiter and purge messages that satisfy certain criteria. Additionally, `QueueChannel` stores all messages in memory since it wraps a queue internally. 
+The `QueueChannel` class is the simplest implementation of the `MessageChannel` interface. `QueueChannel` has point-to-point semanteics. In other words, even if the channel has multiple consumers, only one of them will receive any message sent to that channel. `QueueChannel` also provides a mechanism to fiter and purge messages that satisfy certain criteria. Additionally, `QueueChannel` stores all messages in memory since it wraps a queue internally.
+
 By default, `QueueChannel` can use all the available memory to store messages. To avoid running out of memory, `QueueChannel` provides a constructor that accepts the queue capacity.
 
 .QueueChannel.java
@@ -162,6 +165,7 @@ include::{code}/channels/src/main/java/tdgsi/channels/QueueChannel.java[]
 ----
 
 By specifying a message limit, the sender may block until room is available in the queue. Alternately, you can specify a timout parameter on the `send(Message)` method so that the call may block until capacity is available on the queue or the timeout occurs.
+
 The `QueueChannel` implements a `receive()` method which returns immediately when a message is already waiting on the internal queue, or will block until one is ready for consumption. This behaviour can be altered by using the overloaded `receive()` method with timeout parameter. Specifying a timeout value 0 will cause the `receive()` method to return immediately if no message is available.
 
 .QueueChannel Class Diagram
@@ -181,12 +185,12 @@ The `RendezvousChannel` is a synchronized version of the `QUeueChannel`. It uses
 similar to a semaphore running in multiple trheads; as a result, it is useful to use `RendesvousChannel` to synchronize multiple threads when semaphores are not an option.
 
 .Rendezvous Channel Class Diagram
-image::{code}/channels/RendezvousChannelClassDiagram.png[alt=Rendezvous Channel Class Diagram]
+image::{code}/channels/diagrams/class/rendezvous.jpg[alt=Rendezvous Channel Class Diagram]
 
 One particularly interesting use case for `RendezvousChannel` is request-reply.  By constructing a RendezvousChannel and setting it's ID as a 'replyChannel' message header on a message being sent, the sender can call `receive` in order to block (and possibly timeout) while waiting for a reply. Spring Integration makes use of this pattern in order to apply request-reply semantics to some components.
 
 .Rendezvous RequestReply Diagram
-image::{code}/channels/RendezvousRequestReplyDiagram.png[alt=Rendezvous Request Reply Diagram]
+image::{code}/channels/diagrams/eip/rendezvous-request-reply.jpg[alt=Rendezvous Request Reply Diagram]
 
 ==== DirectChannel
 
@@ -197,7 +201,7 @@ by the outcome of the MessageHandler's `handleMessage(Message)` method.
 Figure $$$ shows a comprehensive class hierarchy of the subclasses of `MessageChannel` that compose `DirectChannel`.
 
 .Direct Channel Class Diagram
-image::{code}/channels/DirectChannelClassDiagram.png[alt=Direct Channel Class Diagram]
+image::{code}/channels/diagrams/class/direct-channel.jpg[alt=Direct Channel Class Diagram]
 
 ==== ExecutorChannel
 
@@ -205,9 +209,26 @@ Similar to `DirectChannel`, `org.springframework.integration.channel.ExecutorCha
 Because of this, the send method of `ExecutorChannel` will not be blocked and as a result, `ExecutorChannel` does not support transactions that span the sender and receiving `MessageHandler` as does `DirectChannel`.
 
 .Executor Channel Class Diagram
-image::{code}/channels/ExecutorChannelClassDiagram.png[alt=Executor Channel Class Diagram]
+image::{code}/channels/class/executor-channel.jpg[alt=Executor Channel Class Diagram]
 
-==== Point-to-Point Load-Balancing Strategies
+==== Point-to-Point Load-Balancing
+
+ When multiple subscribers are listening on the same Point-to-point message channel, it may exhibit a load-balancing behaviour upon connected consumer message channels. To do this, `DirectChannel`, and `ExecutorChannel` internally delegate to a `org.springframework.integration.dispatcher.MessageDispatcher` to invoke the subscribed message handlers of the downstream channels. 
+ 
+ The load-balancing strategy is used to determine how messages are distributed amongst message handlers - and thus downstream consumers. The following diagram describes this behaviour:
+
+.Load-balancing a channel
+image::{code}/channels/eip/load-balancer.jpg[alt=Load Balancing Handlers Diagram]
+
+Spring Integration comes with 2 strategies - `round-robin` and `none`. By default, Spring Integration will use `Round-Robin` which balances across the message handlers in rotation. You may implement you custom load-balancing logic in the `LoadBalancingStrategy` interface as seen below:
+
+.LoadBalancingStrategy.java
+[source,java,indent=0]
+----
+include::{code}/channels/src/sample/LoadBalancingStrategy.java[]
+----
+
+In addition to loadbalancing, a point-to-point channel may also 'failover' when the situation arises. In this case, when a `MessageHandler` throws an exception, an attempt will be made to deliver the message to the first handler in the sequence. The error of the failed handler along with the message involved will be logged if the `dispatcher` is configured for debug or info levels.
 
 === Scope Binding a Channel
 
