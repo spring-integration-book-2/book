@@ -34,7 +34,7 @@ A point-to-point channel (see Figure $$$) ensures that there is only one consume
 `QueueChannel`, `PriorityChannel`, `RendezvousChannel`, `DirectChannel`, `ExecutorChannel`, and `NullChannel`.
 
 .Point-to-Point Channel
-image::{code}/channels/point-to-point-channel.jpg[alt=The Point to Point Channel]
+image::{code}/channels/diagrams/eip/point-to-point-channel.jpg[alt=The Point to Point Channel]
 
 === Publish-Subscribe Channel
 
@@ -46,7 +46,7 @@ be no one listening to the message that was sent. Spring Integration currently p
 implementation, which is PublishSubscribeChannel. 
 
 .Publish-subscribe Channel
-image::{code}/channels/pubsub-channel.jpg[alt=The Publish Subscribe]
+image::{code}/channels/diagrams/eip/pubsub-channel.jpg[alt=The Publish Subscribe]
 
 === Data-Typed Channel
 
@@ -82,7 +82,7 @@ image::{code}/channels/invalid-message-channel.jpg[alt=The Invalid Message Chann
 When an application fails to deliver a message to the channel after all retry attempts, the message will be sent to the dead letter channel and will be handled further by another process or application listening for messages on that channel (see Figure $$$).
 
 .Dead Letter Channel
-image::{code}/channels/dead-letter-channel.jpg[alt=The Dead Letter Channel]
+image::{code}/channels/diagrams/eip/dead-letter-channel.jpg[alt=The Dead Letter Channel]
 
 === Channel Adapter
 
@@ -91,7 +91,7 @@ Additionally, Channel Adapters come in two modes: in-bound and out-bound for con
 external systems.
 
 .Channel Adapter
-image::{code}/channels/channel-adapter.jpg[alt=The Channel Adapter]
+image::{code}/channels/diagrams/eip/channel-adapter.jpg[alt=The Channel Adapter]
 
 === Messaging bridge
 
@@ -99,7 +99,7 @@ The messaging bridge allows a channel to take the characteristics of another cha
 of application data transformations across system boundaries by including a transformer with the in/out channel of a bridge configuration.
 
 .Messaging Bridge
-image::{code}/channels/messaging-bridge.jpg[alt=The Messaging Bridge]
+image::{code}/channels/diagrams/eip/messaging-bridge.jpg[alt=The Messaging Bridge]
 
 === Guaranteed delivery
 
@@ -107,7 +107,7 @@ Messages are normally stored in memory and wait for delivery by the messaging sy
 Message channels are just another strategy interface and can be tailored to your specific needs as required; implementations can be built that delegate to any data store conceivable using the `MessageStore` interface or - for more control - by implementing the `MessageChannel` interface itself.
 
 .Guaranteed Delivery
-image::{code}/channels/guaranteed-delivery.jpg[alt=Guaranteed Delivery Pattern]
+image::{code}/channels/diagrams/eip/guaranteed-delivery.jpg[alt=Guaranteed Delivery Pattern]
 
 == Choosing a Spring Integration Channel Implementation
 
@@ -229,7 +229,7 @@ image::{code}/channels/diagrams/class/executor-channel.jpg[alt=Executor Channel 
  The load-balancing strategy is used to determine how messages are distributed amongst message handlers - and thus downstream consumers. The following diagram describes this behaviour:
 
 .Load-balancing a channel
-image::{code}/channels/eip/load-balancer.jpg[alt=Load Balancing Handlers Diagram]
+image::{code}/channels/diagrams/eip/load-balancer.jpg[alt=Load Balancing Handlers Diagram]
 
 Spring Integration comes with 2 strategies - `round-robin` and `none`. By default, Spring Integration will use `Round-Robin` which balances across the message handlers in rotation. You may implement you custom load-balancing logic in the `LoadBalancingStrategy` interface as seen below:
 
