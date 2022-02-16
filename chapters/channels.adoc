@@ -55,12 +55,18 @@ consumers need to have knowledge about the message payload data type. The consum
 Usually, this means hinting the consumer with a header that indicates the data type. This translates into a scenario where producer sends object type A and type B through the same channel.
 
 However, a consumer may only be able to process one type of data. Such a processor for example may only take type A, while anoanother can take type B.
-A message channel that only contains single type of objects or messages is called a data-typed channel. This approcach solves the problem of breaking
-down data types by router or filter and allows a direct 1:1 relationship for producer-channel and consume-channel.
-An example of a channel that can handle different data types of data, and a `data-type` channel is shown in figure $$$.
+A message channel that only contains single type of objects or messages is called a data-typed channel.
 
 .Data-Typed Channel
-image::{code}/channels/data-typed-channel.jpg[alt=The Data Typed Channel]
+image::{code}/channels/diagrams/eip/data-typed-channel.jpg[alt=The Data Typed Channel]
+
+This approcach solves the problem of breaking down data types using routers and or filters to do the work of enforcing types to channel to processors. True data-typed channels allow direct 1:1 relationship for producer-channel and consumer-channel instead. An example of a `data-type` channel definition in Spring Integration is shown below.
+
+.DataTyped channel Example
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/tdg2si/channels/DataTyped.java[]
+----
 
 === Invalid Message Channel
 
@@ -146,7 +152,7 @@ The `PublishSubscribeChannel` implementation is the basic publish-subscribe (Pub
 The channel has a behaviour of sending messages to subscribers only when a `minSubscribers` threshold (0 or more) is set.
 
 .PublishSubscribe Channel Class Diagram
-image::{code}/channels/PublishSubscribeChannelClassDiagram.png[alt=PubSub Channel Class Diagram]
+image::{code}/channels/diagrams/class/pub-sub.jpg[alt=PubSub Channel Class Diagram]
 
 === Point-to-Point Channel
 
@@ -232,19 +238,51 @@ In addition to loadbalancing, a point-to-point channel may also 'failover' when 
 
 === Scope Binding a Channel
 
-In order to restrict a message channel the same `scope` as define in an instance of `org.springframework.beans.factory.config.Scope`, the developer can define a channel scope attribute that applies to that channel.
-A common use case is to bind a channel to the current thread. This channel delegates to a queue internally like a QueueChannel, but the channel (as well as the internal queue) is bound to the current thread. By defining the channel scope attribute, no other thread will be able to access a message within the thread-scoped message channel.
+In the Bootstrap Chapter $, we learned that a scope is actually a recipe for creating the instances of whatever class is being defined - In this case, a `MessageChannel`. There are a number of scopes supported out of the box by Spring Framework. The following chart shows pre-defined scopes supported:
 
-.Common Channel Scopes
-image::{code}/channels/ScopesDiagram.png[alt=Common Channel Scopes]
+[cols="1,1"]
+|===
+|Scope
+|Definition
+
+|Singleton
+|Scopes a single bean to a single object instance per IoC container.
+
+|Prototype
+|One definition to many instances. i.e. each injection point.
+
+|Request
+|Similar to prototype, except this one scopes a bean definition to the lifecycle of an HTTP request. All Request and Session scopes are only valid within the context of a web-aware `ApplicationContext`
+
+|Session
+|Similar to `Request` scope, but creates an instance of a bean definition per HTTP `Session`
+
+|Global Session
+|Similar to the `Session` scope, but expands the scope to Global HTTP `Session` - thus every session will share the bean instance.
+
+|===
+
+In order to restrict a message channel the same `scope` as define in an instance of `org.springframework.beans.factory.config.Scope`, the developer can set a scope - via `@Scope` that applies to that channel. Additionally, since channels can be scoped, you can define your custom scope in addition to the pre-defined scopes. 
+
+An example that configures and binds to a custom `org.springframework.context.support.SimpleThreadScope` scope is shown below:
+
+.ScopedChannel.java
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdg2si/channels/ScopedChannel.java[]
+----
+
+This channel delegates to a queue internally like a QueueChannel, but the channel (as well as the internal queue) is bound to the current thread. By defining the channel scope attribute, no other thread will be able to access a message within the thread-scoped message channel.
+
+> NOTE: `SimpleThreadScope` is not registered in the context by default, so as in the example above, you need to explicitly define and assign one implementating a configurtion with the `org.springframework.beans.factory.config.BeanFactoryPostProcessor` interface.
 
 === NullChannel
 
-This channel implementation behaves like '/dev/null' in traditional POSIX systems. The `NullChannel` is very interesting - it is a dummy message channel that does nothing. It does not pass any message from the sender to the receiver. `NullChannel`'s send method always returns true, while it's receive() method always returns a `null` value. In other words, `NullChannel` always returns 
+This channel implementation behaves like '/dev/null' in traditional POSIX compliant systems. The `NullChannel` is very interesting - it is a dummy message channel that does nothing. It does not pass any message from the sender to the receiver. `NullChannel`'s send method always returns true, while it's receive() method always returns a `null` value. In other words, `NullChannel` always returns 
 success when attempting to send, while the channel always appears to contain nothing during reception. Due to the special behavior of `NullChannel`, it is mainly used for unit testing, intgration testing, and debugging.
 
 .Null Channel Class Diagram
-image::{code}/channels/NullChannelClassDiagram.png[alt=Null Channel Class Diagram]
+image::{code}/channels/diagrams/class/null-channel.jpg[alt=Null Channel Class Diagram]
 
 The `NullChannel` is defined within the application context by default along with an `errorChannel`. The channel logs any messages sento to it with DEBUG level.
 

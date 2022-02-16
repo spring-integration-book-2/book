@@ -6,6 +6,8 @@ occasion, however, a little bit of flexibility is required; a message might need
 endpoints at the same time, or it might need to be conditionally sent to one and not another. The
 progression of messages through a system is like the progression of a steady stream; it takes skill and
 ingenuity (and care!) to safely route the flow.
+
+
 In Spring Integration, a message router decides what channel or channels should receive the
 message next. This decision is based on the message’s content and/or metadata contained in the
 message header. A message filter determines if the message should be passed to the output channel at
@@ -16,7 +18,9 @@ does not process the messages in any way; it simply releases the messages to dow
 in a particular order. These are the different components available for controlling message flows in
 Spring Integration. They will all be discussed in this chapter. This chapter will also discuss simplifying
 the configuration using a message handler chain.
-Messaging is inherently stateless. Spring Integration lets you work with the allusion of state by
+Messaging is inherently stateless. 
+
+Spring Integration lets you work with the allusion of state by
 propagating headers from endpoint to endpoint. This lets you make local decisions, to act in the
 integration flow with the knowledge of the state of any given message at any given time, but it does not
 afford you the big-picture view of a directed process. This is where a workflow steps in. Workflow and
@@ -30,6 +34,7 @@ market instruments whose routes are negotiated in terms of market sector, equity
 is where a message router can be leveraged. Filtering provides a way to gate the flow of messages based
 on some condition, which can be very useful as well. This is similar to TCP/IP where firewalls can
 provide deep-packet inspection to selectively meter traffic.
+
 Enterprise applications with many discrete datasets may need to process a large amount of
 information where sending an entire set of data to one location for processing is inefficient.
 Partitionable data can be efficiently processed by splitting it and processing the pieces.
@@ -94,7 +99,7 @@ shown in the following snippet.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/ChatMessage.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/ChatMessage.java[]
 ----
 
 For this sample, lets also create a utility that describes concrete instances of chat messages that may 
@@ -102,7 +107,7 @@ be sent to the message channel.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/ChatMessageGenerator.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/ChatMessageGenerator.java[]
 ----
 
 The router element makes defining a router as simple as specifying an input channel and a router
@@ -115,7 +120,7 @@ name matching the ChatMessage property type.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/ChatMessageRoomRouter.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/ChatMessageRoomRouter.java[]
 ----
 
 The Spring configuration for the router example is shown in Listing 8–4. The router determines the
@@ -123,7 +128,7 @@ outbound message destination based on the router component chatRoomRouter.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/ChatMessageRouterConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/ChatMessageRouterConfiguration.java[]
 ----
 
 ChatMessage message payloads with type 'command' will be sent to the service activator chatRoomMonitor
@@ -132,14 +137,14 @@ service activators are shown.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/ChatMessageAgents.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/ChatMessageAgents.java[]
 ----
 
 This example router may be run with the main class shown in {Listing}.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/ChatRouterMain.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/ChatRouterMain.java[]
 ----
 
 === Dynamic Expression-Based Routing
@@ -157,7 +162,7 @@ ReloadableResourceBundleExpressionSource instance is define using Java configura
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/dynamic/RouterExpressionsConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/dynamic/RouterExpressionsConfiguration.java[]
 ----
 
 === Recipient-List Router
@@ -173,7 +178,7 @@ activator.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/recipient/RouterRecipientsConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/recipient/RouterRecipientsConfiguration.java[]
 ----
 
 Note that the selector-expression will default to true should the expression be un-evaluable or
@@ -191,7 +196,7 @@ we can send messages to a channel based on it's type. In the following example, 
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/payload/RouterPayloadTypeConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/payload/RouterPayloadTypeConfiguration.java[]
 ----
 
 === HeaderValue Routing
@@ -204,7 +209,7 @@ following listing gives further clarity.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/payload/RouterHeaderValueConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/payload/RouterHeaderValueConfiguration.java[]
 ----
 
 *** REWORD ***
@@ -219,7 +224,7 @@ really want to drop messages, you must also have default-output-channel set to n
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/payload/RouterHeaderPayloadConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/payload/RouterHeaderPayloadConfiguration.java[]
 ----
 
 === XPath Routers
@@ -228,7 +233,7 @@ Define the route based on an XPath expression
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/xpath/RouterXPathConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/xpath/RouterXPathConfiguration.java[]
 ----
 
 
@@ -238,14 +243,14 @@ Defines routes based on logic - such as java code.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/basic/BasicRoutingConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/basic/BasicRoutingConfiguration.java[]
 ----
 
 === Route Error handling
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/RouterErrorsConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/RouterErrorsConfiguration.java[]
 ----
 
 == Filters
@@ -262,7 +267,7 @@ of MarketItem with the type stock.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/filters/FilterAnnotationsConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/filters/FilterAnnotationsConfiguration.java[]
 ----
 
 === Splitter
@@ -282,7 +287,7 @@ this example is shown in Listing 8–22.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/splitter/CollectionsSplittersConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/splitter/CollectionsSplittersConfiguration.java[]
 ----
 
 The Java code is similar to the routers and filters, except that the return type of the method
@@ -294,7 +299,7 @@ instances as the payload. An example of a splitter implementation is shown in Li
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/splitter/ReactiveSplittersConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/splitter/ReactiveSplittersConfiguration.java[]
 ----
 
 == Aggregator
@@ -327,7 +332,7 @@ group.
 
 [source,java,indent=0]
 ----
-include::{code}/messageflows/src/main/java/tdgsi/aggregator/AggregatorConfiguration.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/aggregator/AggregatorConfiguration.java[]
 ----
 
 === Maintaining MessageGroup state
