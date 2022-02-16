@@ -152,7 +152,7 @@ The `PublishSubscribeChannel` implementation is the basic publish-subscribe (Pub
 The channel has a behaviour of sending messages to subscribers only when a `minSubscribers` threshold (0 or more) is set.
 
 .PublishSubscribe Channel Class Diagram
-image::{code}/channels/diagrams/class/pub-sub.jpg[alt=PubSub Channel Class Diagram]
+image::{code}/channels/diagrams/class/pub-sub-channel.jpg[alt=PubSub Channel Class Diagram]
 
 === Point-to-Point Channel
 
@@ -167,31 +167,35 @@ By default, `QueueChannel` can use all the available memory to store messages. T
 .QueueChannel.java
 [source,java,indent=0]
 ----
-include::{code}/channels/src/main/java/tdgsi/channels/QueueChannel.java[]
+include::{code}/channels/src/main/sample/QueueChannel.java[]
 ----
 
 By specifying a message limit, the sender may block until room is available in the queue. Alternately, you can specify a timout parameter on the `send(Message)` method so that the call may block until capacity is available on the queue or the timeout occurs.
 
 The `QueueChannel` implements a `receive()` method which returns immediately when a message is already waiting on the internal queue, or will block until one is ready for consumption. This behaviour can be altered by using the overloaded `receive()` method with timeout parameter. Specifying a timeout value 0 will cause the `receive()` method to return immediately if no message is available.
 
+> TIP: Alternatively, we can also enqueue messages outside of the current process/machine - this is something we will discuss later in the chapter for `MessageStore`.
+
 .QueueChannel Class Diagram
-image::{code}/channelsQueueChannelClassDiagram.png[alt=Queue Channel Class Diagram]
+image::{code}/channels/diagrams/class/queue-channel.jpg[alt=Queue Channel Class Diagram]
 
 ==== PriorityChannel
 
-The PriorityChannel exhibits the same holding behaviour as the QueueChannel with the additional behaviour of ordering messages thus giving one message 'priority' over another. In order to achieve this, the `PriorityChannel` uses a `Comparator` to compute message order. By default, this order is obtained from 
-the message header key `priority`. The PriorityChannel provides a constructor that takes a `Comparator<Message>` argument to allow custom comparasion logic.
+The `PriorityChannel` is a direct descendent of the `QueueChannel` with the behaviour of ordering messages thus giving one message 'priority' over another. In order to achieve this, the `PriorityChannel` uses a `Comparator` to compute message order.
+
+By default, the message queue order is obtained from the message header key `priority`. The PriorityChannel also provides a constructor that takes a `Comparator<Message>` argument to allow for custom comparasion logic.
 
 .Priority Channel Class Diagram
-image::{code}/channels/PriorityChannelClassDiagram.png[alt=Priority Channel Class Diagram]
+image::{code}/channels/diagrams/class/priority-channel.png[alt=Priority Channel Class Diagram]
 
 ==== RendezvousChannel
 
-The `RendezvousChannel` is a synchronized version of the `QUeueChannel`. It uses a zero-capacity `SynchronousQueue` instead of `BlockingQueue` internally. The sender will be blocked until the receiver receives the message from the channel. In other words, the sender cannot send the next message until the receiver retrieves the current message from the channel; or, the receiver will block until the sender sends a message to `RendezvousChannel`. The behavior is
-similar to a semaphore running in multiple trheads; as a result, it is useful to use `RendesvousChannel` to synchronize multiple threads when semaphores are not an option.
+The `RendezvousChannel` is a synchronized descendent of the `QueueChannel`. It uses a zero-capacity `SynchronousQueue` instead of `BlockingQueue` internally. The sender will be blocked until the receiver receives the message from the channel. In other words, the sender cannot send the next message until the receiver retrieves the current message from the channel; or, the receiver will block until the sender sends a message to `RendezvousChannel`. 
+
+The behavior is similar to a semaphore running in multiple trheads; as a result, it is useful to use `RendesvousChannel` to synchronize multiple threads when semaphores are not an option.
 
 .Rendezvous Channel Class Diagram
-image::{code}/channels/diagrams/class/rendezvous.jpg[alt=Rendezvous Channel Class Diagram]
+image::{code}/channels/diagrams/class/rendezvous-channel.jpg[alt=Rendezvous Channel Class Diagram]
 
 One particularly interesting use case for `RendezvousChannel` is request-reply.  By constructing a RendezvousChannel and setting it's ID as a 'replyChannel' message header on a message being sent, the sender can call `receive` in order to block (and possibly timeout) while waiting for a reply. Spring Integration makes use of this pattern in order to apply request-reply semantics to some components.
 
@@ -201,8 +205,8 @@ image::{code}/channels/diagrams/eip/rendezvous-request-reply.jpg[alt=Rendezvous 
 ==== DirectChannel
 
 The channel implementation considered 'default' - and the simplest - is the `org.springframework.integration.channel.DirectChannel` - a mixture of point-to-point and publish-subscribe channels. It uses the publish-subscribe pattern so the message will be pushed to the consumer, but only one consumer can receive the same message at any given time. As a result, `DirectChannel` is actually a point-to-point channel.
-The `DirectChannel` allows for a single thread to perform both sides of the channel operation - that is send and receive - in which the `MessageHandler` will invoke `handleMessage(Message)` method directly on the sender thread, before the `send()` method can return. This allows for transactions to occur across channels while still being loose coupled to the messaging system. In this way, a `send()` call within the scope of a transaction will have it's outcome determined
-by the outcome of the MessageHandler's `handleMessage(Message)` method. 
+
+The `DirectChannel` allows for a single thread to perform both sides of the channel operation - that is send and receive - in which the `MessageHandler` will invoke `handleMessage(Message)` method directly on the sender thread, before the `send()` method can return. This allows for transactions to occur across channels while still being loose coupled to the messaging system. In this way, a `send()` call within the scope of a transaction will have it's outcome determined by the outcome of the MessageHandler's `handleMessage(Message)` method. 
 
 Figure $$$ shows a comprehensive class hierarchy of the subclasses of `MessageChannel` that compose `DirectChannel`.
 
@@ -211,11 +215,12 @@ image::{code}/channels/diagrams/class/direct-channel.jpg[alt=Direct Channel Clas
 
 ==== ExecutorChannel
 
-Similar to `DirectChannel`, `org.springframework.integration.channel.ExecutorChannel` is a point-to-point message channel. However, it allows the dispatching to happen in an instance of `java.util.concurrent.Executor` in a thread separate from the sender thread.
+Similar to `DirectChannel`, `org.springframework.integration.channel.ExecutorChannel` is a point-to-point message channel. However, it dispatches messages with help from `java.util.concurrent.Executor`, in a thread separate from the sender thread.
+
 Because of this, the send method of `ExecutorChannel` will not be blocked and as a result, `ExecutorChannel` does not support transactions that span the sender and receiving `MessageHandler` as does `DirectChannel`.
 
 .Executor Channel Class Diagram
-image::{code}/channels/class/executor-channel.jpg[alt=Executor Channel Class Diagram]
+image::{code}/channels/diagrams/class/executor-channel.jpg[alt=Executor Channel Class Diagram]
 
 ==== Point-to-Point Load-Balancing
 
@@ -240,6 +245,7 @@ In addition to loadbalancing, a point-to-point channel may also 'failover' when 
 
 In the Bootstrap Chapter $, we learned that a scope is actually a recipe for creating the instances of whatever class is being defined - In this case, a `MessageChannel`. There are a number of scopes supported out of the box by Spring Framework. The following chart shows pre-defined scopes supported:
 
+.Supported Scopes in the Spring Framework
 [cols="1,1"]
 |===
 |Scope
@@ -297,27 +303,102 @@ This reactive `FluxMessageChannel` should be used to bridge Reactive streams int
 use this only in conjunction with other `FluxMessageChannel` or as to bridge a `org.reactivestreams.Publisher` with the Integration Flow.
 
 .FluxMessageChannel Class Diagram
-image::{code}/channels/FluxMessageChannelDiagram.png[alt=Flux Message Channel Class Diagram]
+image::{code}/channels/diagrams/class/flux-message-channel.jpg[alt=Flux Message Channel Class Diagram]
 
 == Channel Interceptors
 
-Spring Integration provides the ability to intercept the messages at specific stages around the `MessageChannel`'s send and receive operations. The `ChannelInteceptor` interface allows the message to be intercepted - much like AOP - before and after it is sent and/or received WITHOUT error, and finally as a completion phase whether or not an exception has occured.
-The following graphs depicts the stages of a message channel where an interceptor perofrms each of it's methods.
+Spring Integration provides the ability to intercept messages at specific stages around a `MessageChannel`'s send and receive operations by way of the `org.springframework.messaging.support.ChannelInterceptor` interface.
 
-.ChannelInteceptor Interception Diagram
-image::{code}/channels/ChannelInteceptorDiagram.png[alt=ChannelInteceptor Diagram]
-
-Since only the `PollableChannel` interface has the receive operation, `preReceive` and `postReceive` will be invoked only for `PolalbleChannel` implementations. The different available interceptor methods for the various message channesls are shown in Table $$$.
-
-.Table $$$. Message Channels and Interceptors
-image::{code}/channels/ChannelInteceptorInteractionDiagram.png[alt=ChannelInteceptor Interaction Diagram]
+The `org.springframework.messaging.support.InterceptableChannel` interface provides management methods (add, remove) for a `MessageChannel` to implement, while the `ChannelInterceptor` itself does the work at various interception points. 
 
 One example of how this works in practice is the `WireTap` inteceptor that binds to a channel being operated on. This interceptor sends each passing message onto another `wiretap` channel as each message passes through the bound channel.
 This channel logs each message and is good for debugging testing and monitoring.
 
+Because of the nature of channels having specific send/receive logic, the different available interceptor methods for the various message channesls are shown in the table below.
+
+> NOTE: Since only the `PollableChannel` interface has the receive operation, `preReceive` and `postReceive` will be invoked only for `PolalbleChannel` implementations. 
+
+.Message Channels and Interceptors
+[cols="1,1"]
+|===
+|Message Channel
+|preSend()
+|preReceive()
+|postSend()
+|postReceive()
+|afterSendComletion
+|afterReceiveCompletion
+
+|QueueChannel
+|Y
+|Y
+|Y
+|Y
+|M
+|M
+
+|PriorityChannel
+|Y
+|Y
+|Y
+|Y
+|M
+|M
+
+|RendezvousChannel
+|Y
+|Y
+|Y
+|Y
+|M
+|M
+
+|DirectChannel
+|Y
+|N
+|Y
+|N
+|M
+|M
+
+|ExecutorChannel
+|Y
+|N
+|Y
+|N
+|M
+|M
+
+|NullChannel
+|Y
+|Y
+|Y
+|Y
+|M
+|M
+
+|PublishSubscribeChannel
+|Y
+|N
+|Y
+|N
+|M
+|M
+
+|FluxMessageChannel
+|Y
+|Y
+|Y
+|Y
+|M
+|M
+|===
+
 === Global Interceptors
 
 Spring Integration allows interceptors to be registered and applied to dynamically registered channels - such as at the time of definition through one of the DSL definitions or `beanFactory` initialized beans.
+
+===== SHOW EXAMPLE OF THIS
 
 == MessagingTemplate
 
