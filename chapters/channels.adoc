@@ -30,18 +30,18 @@ Enterprise Integration Patterns describe serveral different kinds of channels th
 
 === Point-to-Point Channel
 
-A point-to-point channel (see Figure 12) ensures that there is only one consumer that receives the same message from the sender at any given time. Spring Integration provides several types of point-to-point channel implementations:
+A point-to-point channel (see Figure $$$) ensures that there is only one consumer that receives the same message from the sender at any given time. Spring Integration provides several types of point-to-point channel implementations:
 `QueueChannel`, `PriorityChannel`, `RendezvousChannel`, `DirectChannel`, `ExecutorChannel`, and `NullChannel`.
 
 .Point-to-Point Channel
-image::{code}/channels/diagrams/eip/point-to-point-channel.jpg[alt=The Point to Point Channel]
+image::{code}/channels/diagrams/eip/point-to-point-channel.jpg[alt=The Point to Point Channel,scaledwidth=80%]
 
 === Publish-Subscribe Channel
 
 The publish-subscribe channel (see Figurre $$$) allows one-to-many relationship between the producer and consumer, such that multiple consumers may receive the same message. The message is marked as received and removed from the channel when all the subscribed receivers have consumed the message. Publish-Subscribe implementation may even have a 'fire-and-forget' semantic which means there could be no one listening to the message that was sent. Spring Integration currently provides a publish-subscribe–style message channel implementation, which is PublishSubscribeChannel. 
 
 .Publish-subscribe Channel
-image::{code}/channels/diagrams/eip/pubsub-channel.jpg[alt=The Publish Subscribe,pdfwidth=50vw]
+image::{code}/channels/diagrams/eip/pubsub-channel.jpg[alt=The Publish Subscribe,scaledwidth=50%]
 
 === Data-Typed Channel
 
@@ -52,7 +52,7 @@ Usually, this means hinting the consumer with a header that indicates the data t
 However, a consumer may only be able to process one type of data. Such a processor for example may only take type A, while anoanother can take type B. A message channel that only contains single type of objects or messages is called a data-typed channel.
 
 .Data-Typed Channel
-image::{code}/channels/diagrams/eip/data-typed-channel.jpg[alt=The Data Typed Channel,pdfwidth=50vw]
+image::{code}/channels/diagrams/eip/data-typed-channel.jpg[alt=The Data Typed Channel,scaledwidth=40%]
 
 This approcach solves the problem of breaking down data types using routers and or filters to do the work of enforcing types to channel to processors. True data-typed channels allow direct 1:1 relationship for producer-channel and consumer-channel instead. An example of a `data-type` channel definition in Spring Integration is shown below.
 
@@ -70,14 +70,14 @@ This message will then get routed into the invalid message channel (see Figure $
 In Spring Integration, the validation would be done by a message filter, which is discussed more in depth in Chapter $$$.
 
 .Invalid Message Channel
-image::{code}/channels/diagrams/eip/invalid-message-channel.jpg[alt=The Invalid Message Channel,pdfwidth=50vw]
+image::{code}/channels/diagrams/eip/invalid-message-channel.jpg[alt=The Invalid Message Channel,scaledwidth=75%]
 
 === Dead Letter Channel
 
 When an application fails to deliver a message to the channel after all retry attempts, the message will be sent to the dead letter channel and will be handled further by another process or application listening for messages on that channel (see Figure $$$).
 
 .Dead Letter Channel
-image::{code}/channels/diagrams/eip/dead-letter-channel.jpg[alt=The Dead Letter Channel]
+image::{code}/channels/diagrams/eip/dead-letter-channel.jpg[alt=The Dead Letter Channel,scaledwidth=50%]
 
 === Channel Adapter
 
@@ -86,7 +86,7 @@ Additionally, Channel Adapters come in two modes: in-bound and out-bound for con
 external systems.
 
 .Channel Adapter
-image::{code}/channels/diagrams/eip/channel-adapter.jpg[alt=The Channel Adapter]
+image::{code}/channels/diagrams/eip/channel-adapter.jpg[alt=The Channel Adapter,scaledwidth=50%]
 
 === Messaging bridge
 
@@ -94,7 +94,7 @@ The messaging bridge allows a channel to take the characteristics of another cha
 of application data transformations across system boundaries by including a transformer with the in/out channel of a bridge configuration.
 
 .Messaging Bridge
-image::{code}/channels/diagrams/eip/messaging-bridge.jpg[alt=The Messaging Bridge]
+image::{code}/channels/diagrams/eip/messaging-bridge.jpg[alt=The Messaging Bridge,scaledwidth=40%]
 
 === Guaranteed delivery
 
@@ -102,7 +102,7 @@ Messages are normally stored in memory and wait for delivery by the messaging sy
 Message channels are just another strategy interface and can be tailored to your specific needs as required; implementations can be built that delegate to any data store conceivable using the `MessageStore` interface or - for more control - by implementing the `MessageChannel` interface itself.
 
 .Guaranteed Delivery
-image::{code}/channels/diagrams/eip/guaranteed-delivery.jpg[alt=Guaranteed Delivery Pattern]
+image::{code}/channels/diagrams/eip/guaranteed-delivery.jpg[alt=Guaranteed Delivery Pattern,scaledwidth=40%]
 
 == Choosing a Spring Integration Channel Implementation
 
@@ -172,7 +172,7 @@ The `QueueChannel` implements a `receive()` method which returns immediately whe
 > TIP: Alternatively, we can also enqueue messages outside of the current process/machine - this is something we will discuss later in the chapter for `MessageStore`.
 
 .QueueChannel Class Diagram
-image::{code}/channels/diagrams/class/queue-channel.jpg[alt=Queue Channel Class Diagram]
+image::{code}/channels/diagrams/class/queue-channel.jpg[alt=Queue Channel Class Diagram,scaledwidth=40%]
 
 ==== PriorityChannel
 
@@ -181,7 +181,7 @@ The `PriorityChannel` is a direct descendent of the `QueueChannel` with the beha
 By default, the message queue order is obtained from the message header key `priority`. The PriorityChannel also provides a constructor that takes a `Comparator<Message>` argument to allow for custom comparasion logic.
 
 .Priority Channel Class Diagram
-image::{code}/channels/diagrams/class/priority-channel.png[alt=Priority Channel Class Diagram]
+image::{code}/channels/diagrams/class/priority-channel.jpg[alt=Priority Channel Class Diagram,scaledwidth=40%]
 
 ==== RendezvousChannel
 
@@ -190,12 +190,12 @@ The `RendezvousChannel` is a synchronized descendent of the `QueueChannel`. It u
 The behavior is similar to a semaphore running in multiple trheads; as a result, it is useful to use `RendesvousChannel` to synchronize multiple threads when semaphores are not an option.
 
 .Rendezvous Channel Class Diagram
-image::{code}/channels/diagrams/class/rendezvous-channel.jpg[alt=Rendezvous Channel Class Diagram]
+image::{code}/channels/diagrams/class/rendezvous-channel.jpg[alt=Rendezvous Channel Class Diagram,scaledwidth=40%]
 
 One particularly interesting use case for `RendezvousChannel` is request-reply.  By constructing a RendezvousChannel and setting it's ID as a 'replyChannel' message header on a message being sent, the sender can call `receive` in order to block (and possibly timeout) while waiting for a reply. Spring Integration makes use of this pattern in order to apply request-reply semantics to some components.
 
 .Rendezvous RequestReply Diagram
-image::{code}/channels/diagrams/eip/rendezvous-request-reply.jpg[alt=Rendezvous Request Reply Diagram]
+image::{code}/channels/diagrams/eip/rendezvous-request-reply.jpg[alt=Rendezvous Request Reply Diagram,scaledwidth=40%]
 
 ==== DirectChannel
 
@@ -206,7 +206,7 @@ The `DirectChannel` allows for a single thread to perform both sides of the chan
 Figure $$$ shows a comprehensive class hierarchy of the subclasses of `MessageChannel` that compose `DirectChannel`.
 
 .Direct Channel Class Diagram
-image::{code}/channels/diagrams/class/direct-channel.jpg[alt=Direct Channel Class Diagram]
+image::{code}/channels/diagrams/class/direct-channel.jpg[alt=Direct Channel Class Diagram,scaledwidth=40%]
 
 ==== ExecutorChannel
 
@@ -215,7 +215,7 @@ Similar to `DirectChannel`, `org.springframework.integration.channel.ExecutorCha
 Because of this, the send method of `ExecutorChannel` will not be blocked and as a result, `ExecutorChannel` does not support transactions that span the sender and receiving `MessageHandler` as does `DirectChannel`.
 
 .Executor Channel Class Diagram
-image::{code}/channels/diagrams/class/executor-channel.jpg[alt=Executor Channel Class Diagram]
+image::{code}/channels/diagrams/class/executor-channel.jpg[alt=Executor Channel Class Diagram,scaledwidth=40%]
 
 ==== Point-to-Point Load-Balancing
 
@@ -224,7 +224,7 @@ When multiple subscribers are listening on the same Point-to-point message chann
 The load-balancing strategy is used to determine how messages are distributed amongst message handlers - and thus downstream consumers. The following diagram describes this behaviour:
 
 .Load-balancing a channel
-image::{code}/channels/diagrams/eip/load-balancer.jpg[alt=Load Balancing Handlers Diagram]
+image::{code}/channels/diagrams/eip/load-balancer.jpg[alt=Load Balancing Handlers Diagram,scaledwidth=40%]
 
 Spring Integration comes with 2 strategies - `round-robin` and `none`. By default, Spring Integration will use `Round-Robin` which balances across the message handlers in rotation. You may implement you custom load-balancing logic in the `LoadBalancingStrategy` interface as seen below:
 
@@ -298,7 +298,7 @@ This reactive `FluxMessageChannel` should be used to bridge Reactive streams int
 use this only in conjunction with other `FluxMessageChannel` or as to bridge a `org.reactivestreams.Publisher` with the Integration Flow.
 
 .FluxMessageChannel Class Diagram
-image::{code}/channels/diagrams/class/flux-message-channel.jpg[alt=Flux Message Channel Class Diagram]
+image::{code}/channels/diagrams/class/flux-message-channel.jpg[alt=Flux Message Channel Class Diagram,scaledwidth=40%]
 
 == Channel Interceptors
 
