@@ -147,7 +147,7 @@ The `PublishSubscribeChannel` implementation is the basic publish-subscribe (Pub
 The channel has a behaviour of sending messages to subscribers only when a `minSubscribers` threshold (0 or more) is set.
 
 .PublishSubscribe Channel Class Diagram
-image::{code}/channels/diagrams/class/pub-sub-channel.jpg[alt=PubSub Channel Class Diagram]
+image::{code}/channels/diagrams/class/pub-sub-channel.jpg[alt=PubSub Channel Class Diagram,scaledwidth=40%]
 
 === Point-to-Point Channel
 
@@ -181,7 +181,7 @@ The `PriorityChannel` is a direct descendent of the `QueueChannel` with the beha
 By default, the message queue order is obtained from the message header key `priority`. The PriorityChannel also provides a constructor that takes a `Comparator<Message>` argument to allow for custom comparasion logic.
 
 .Priority Channel Class Diagram
-image::{code}/channels/diagrams/class/priority-channel.jpg[alt=Priority Channel Class Diagram,scaledwidth=40%]
+image::{code}/channels/diagrams/class/priority-channel.jpg[alt=Priority Channel Class Diagram,scaledwidth=25%]
 
 ==== RendezvousChannel
 
@@ -190,7 +190,7 @@ The `RendezvousChannel` is a synchronized descendent of the `QueueChannel`. It u
 The behavior is similar to a semaphore running in multiple trheads; as a result, it is useful to use `RendesvousChannel` to synchronize multiple threads when semaphores are not an option.
 
 .Rendezvous Channel Class Diagram
-image::{code}/channels/diagrams/class/rendezvous-channel.jpg[alt=Rendezvous Channel Class Diagram,scaledwidth=40%]
+image::{code}/channels/diagrams/class/rendezvous-channel.jpg[alt=Rendezvous Channel Class Diagram,scaledwidth=25%]
 
 One particularly interesting use case for `RendezvousChannel` is request-reply.  By constructing a RendezvousChannel and setting it's ID as a 'replyChannel' message header on a message being sent, the sender can call `receive` in order to block (and possibly timeout) while waiting for a reply. Spring Integration makes use of this pattern in order to apply request-reply semantics to some components.
 
@@ -231,7 +231,7 @@ Spring Integration comes with 2 strategies - `round-robin` and `none`. By defaul
 .LoadBalancingStrategy.java
 [source,java,indent=0]
 ----
-include::{code}/channels/src/sample/LoadBalancingStrategy.java[]
+include::{code}/channels/src/main/sample/LoadBalancingStrategy.java[]
 ----
 
 In addition to loadbalancing, a point-to-point channel may also 'failover' when the situation arises. In this case, when a `MessageHandler` throws an exception, an attempt will be made to deliver the message to the first handler in the sequence. The error of the failed handler along with the message involved will be logged if the `dispatcher` is configured for debug or info levels.
@@ -283,7 +283,7 @@ This channel implementation behaves like '/dev/null' in traditional POSIX compli
 success when attempting to send, while the channel always appears to contain nothing during reception. Due to the special behavior of `NullChannel`, it is mainly used for unit testing, intgration testing, and debugging.
 
 .Null Channel Class Diagram
-image::{code}/channels/diagrams/class/null-channel.jpg[alt=Null Channel Class Diagram]
+image::{code}/channels/diagrams/class/null-channel.jpg[alt=Null Channel Class Diagram,scaledwidth=25%]
 
 The `NullChannel` is defined within the application context by default along with an `errorChannel`. The channel logs any messages sento to it with DEBUG level.
 
