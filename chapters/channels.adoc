@@ -30,20 +30,15 @@ Enterprise Integration Patterns describe serveral different kinds of channels th
 
 === Point-to-Point Channel
 
-A point-to-point channel (see Figure $$$) ensures that there is only one consumer that receives the same message from the sender at any given time. Spring Integration provides several types of point-to-point channel implementations:
+A point-to-point channel (see Figure 12) ensures that there is only one consumer that receives the same message from the sender at any given time. Spring Integration provides several types of point-to-point channel implementations:
 `QueueChannel`, `PriorityChannel`, `RendezvousChannel`, `DirectChannel`, `ExecutorChannel`, and `NullChannel`.
 
-.Point-to-Point Channel
+el.caption = Point-to-Point Channel
 image::{code}/channels/diagrams/eip/point-to-point-channel.jpg[alt=The Point to Point Channel]
 
 === Publish-Subscribe Channel
 
-The publish-subscribe channel (see Figurre $$$) allows one-to-many relationship between the producer
-and consumer, such that multiple consumers may receive the same message. The message is marked as
-“received” and removed from the channel when all the subscribed receivers have consumed the
-message. Publish-Subscribe implementation may even have a 'fire-and-forget' semantic which means there could
-be no one listening to the message that was sent. Spring Integration currently provides a publish-subscribe–style message channel
-implementation, which is PublishSubscribeChannel. 
+The publish-subscribe channel (see Figurre $$$) allows one-to-many relationship between the producer and consumer, such that multiple consumers may receive the same message. The message is marked as received and removed from the channel when all the subscribed receivers have consumed the message. Publish-Subscribe implementation may even have a 'fire-and-forget' semantic which means there could be no one listening to the message that was sent. Spring Integration currently provides a publish-subscribe–style message channel implementation, which is PublishSubscribeChannel. 
 
 .Publish-subscribe Channel
 image::{code}/channels/diagrams/eip/pubsub-channel.jpg[alt=The Publish Subscribe]
