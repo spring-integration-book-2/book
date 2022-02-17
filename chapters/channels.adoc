@@ -70,7 +70,7 @@ This message will then get routed into the invalid message channel (see Figure $
 In Spring Integration, the validation would be done by a message filter, which is discussed more in depth in Chapter $$$.
 
 .Invalid Message Channel
-image::{code}/channels/invalid-message-channel.jpg[alt=The Invalid Message Channel]
+image::{code}/channels/diagrams/eip/invalid-message-channel.jpg[alt=The Invalid Message Channel,pdfwidth=50vw]
 
 === Dead Letter Channel
 
