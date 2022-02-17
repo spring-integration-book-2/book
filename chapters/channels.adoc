@@ -33,7 +33,7 @@ Enterprise Integration Patterns describe serveral different kinds of channels th
 A point-to-point channel (see Figure 12) ensures that there is only one consumer that receives the same message from the sender at any given time. Spring Integration provides several types of point-to-point channel implementations:
 `QueueChannel`, `PriorityChannel`, `RendezvousChannel`, `DirectChannel`, `ExecutorChannel`, and `NullChannel`.
 
-el.caption = Point-to-Point Channel
+.Point-to-Point Channel
 image::{code}/channels/diagrams/eip/point-to-point-channel.jpg[alt=The Point to Point Channel]
 
 === Publish-Subscribe Channel
@@ -41,7 +41,7 @@ image::{code}/channels/diagrams/eip/point-to-point-channel.jpg[alt=The Point to 
 The publish-subscribe channel (see Figurre $$$) allows one-to-many relationship between the producer and consumer, such that multiple consumers may receive the same message. The message is marked as received and removed from the channel when all the subscribed receivers have consumed the message. Publish-Subscribe implementation may even have a 'fire-and-forget' semantic which means there could be no one listening to the message that was sent. Spring Integration currently provides a publish-subscribe–style message channel implementation, which is PublishSubscribeChannel. 
 
 .Publish-subscribe Channel
-image::{code}/channels/diagrams/eip/pubsub-channel.jpg[alt=The Publish Subscribe]
+image::{code}/channels/diagrams/eip/pubsub-channel.jpg[alt=The Publish Subscribe,pdfwidth=50vw]
 
 === Data-Typed Channel
 
@@ -49,19 +49,19 @@ Applications can use the message channel to transfer different types of data bet
 consumers need to have knowledge about the message payload data type. The consumer needs to determine the object type in order to apply proper business logic to handle the message.
 Usually, this means hinting the consumer with a header that indicates the data type. This translates into a scenario where producer sends object type A and type B through the same channel.
 
-However, a consumer may only be able to process one type of data. Such a processor for example may only take type A, while anoanother can take type B.
-A message channel that only contains single type of objects or messages is called a data-typed channel.
+However, a consumer may only be able to process one type of data. Such a processor for example may only take type A, while anoanother can take type B. A message channel that only contains single type of objects or messages is called a data-typed channel.
 
 .Data-Typed Channel
-image::{code}/channels/diagrams/eip/data-typed-channel.jpg[alt=The Data Typed Channel]
+image::{code}/channels/diagrams/eip/data-typed-channel.jpg[alt=The Data Typed Channel,pdfwidth=50vw]
 
 This approcach solves the problem of breaking down data types using routers and or filters to do the work of enforcing types to channel to processors. True data-typed channels allow direct 1:1 relationship for producer-channel and consumer-channel instead. An example of a `data-type` channel definition in Spring Integration is shown below.
 
 .DataTyped channel Example
 [source,java,indent=0]
 ----
-include::{code}/channels/src/main/tdg2si/channels/DataTyped.java[]
+include::{code}/channels/src/main/java/tdg2si/channels/DataTyped.java[]
 ----
+<1> DSL method for `datatype` on a channel accpepts variable argument for the class(es) accepted. In this case, both `Double` and `Float` are accpeted.
 
 === Invalid Message Channel
 
