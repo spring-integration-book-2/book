@@ -224,9 +224,9 @@ image::{code}/channels/diagrams/class/executor-channel.jpg[alt=Executor Channel 
 
 ==== Point-to-Point Load-Balancing
 
- When multiple subscribers are listening on the same Point-to-point message channel, it may exhibit a load-balancing behaviour upon connected consumer message channels. To do this, `DirectChannel`, and `ExecutorChannel` internally delegate to a `org.springframework.integration.dispatcher.MessageDispatcher` to invoke the subscribed message handlers of the downstream channels. 
+When multiple subscribers are listening on the same Point-to-point message channel, it may exhibit a load-balancing behaviour upon connected consumer message channels. To do this, `DirectChannel`, and `ExecutorChannel` internally delegate to a `org.springframework.integration.dispatcher.MessageDispatcher` to invoke the subscribed message handlers of the downstream channels. 
  
- The load-balancing strategy is used to determine how messages are distributed amongst message handlers - and thus downstream consumers. The following diagram describes this behaviour:
+The load-balancing strategy is used to determine how messages are distributed amongst message handlers - and thus downstream consumers. The following diagram describes this behaviour:
 
 .Load-balancing a channel
 image::{code}/channels/diagrams/eip/load-balancer.jpg[alt=Load Balancing Handlers Diagram]
@@ -319,7 +319,7 @@ Because of the nature of channels having specific send/receive logic, the differ
 > NOTE: Since only the `PollableChannel` interface has the receive operation, `preReceive` and `postReceive` will be invoked only for `PolalbleChannel` implementations. 
 
 .Message Channels and Interceptors
-[cols="1,1"]
+[cols="1,1,1,1,1,1,1"]
 |===
 |Message Channel
 |preSend()
@@ -394,19 +394,28 @@ Because of the nature of channels having specific send/receive logic, the differ
 |M
 |===
 
+The `afterSendCompletion()` and `afterReceiveCompletion()` methods always get invoked regardless of successful or abnormal completion. It is a useful way to express guaranteed logic after send/receive, as the other methods will not be invoked in case of an error.
+
 === Global Interceptors
 
-Spring Integration allows interceptors to be registered and applied to dynamically registered channels - such as at the time of definition through one of the DSL definitions or `beanFactory` initialized beans.
+Spring Integration also allows interceptors to be registered and applied to dynamically registered channels.  such as at the time of definition through one of the DSL definitions or through `beanFactory` initialized beans. Below is an example of how this works with the `@GlobalInterceptor` annotation:
 
-===== SHOW EXAMPLE OF THIS
+.GlobalInterceptors.java
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdg2si/channels/GlobalInterceptors.java[]
+----
+<1> The IntegrationFlow definitions follows dynamic channel creation guidelines. That is, a channel by the name of 'username-input' gets created with its output to the 'nullChannel' which is auto-creteated during ApplicationContext startup.
+<2> The GlobalInterceptor bean gets registered and contains a `pattern` parameter that specifies how to identify the channel we want to have it registered on. In this case, any channel ending with 'input' will have this interceptor attached.
+<3> This instance of `org.springframework.integration.channel.interceptor.MessageSelectingInterceptor` interceptor just lets all messages pass. In practice, one should perform some kind of lookup or calculation against the message (header/payload) to determine whether to send it or not.
 
 == MessagingTemplate
 
-Spring Integration provides `MessagingTemplate` as a very easy way to integrate a messaging system into applications. It supports common message channel operations, such as send and receive. `MessagingTemplate` can support transactions by providing a `PlatformTransactionManager`. Additionally, The `MessagingTemplate` can build Spring Integration `Message` instances.
+Spring Integration provides `MessagingTemplate` as a very easy way to integrate a messaging system into applications. It supports common message channel operations, such as send and receive. `MessagingTemplate` can support transactions by accepting a `PlatformTransactionManager`. Additionally, The `MessagingTemplate` can build Spring Integration `Message` instances.
 
 == Configuring Message Channels
 
-This section will focus on practical usages for each of the channel implementations discussed earlier. We will focus on configuration using JavaDSL formation. 
+This section will focus on practical usages for each of the channel implementations discussed earlier. We will focus on configuration using JavaDSL configuration. 
 
 == Channel persistence
 
