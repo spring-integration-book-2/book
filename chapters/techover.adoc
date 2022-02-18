@@ -10,14 +10,14 @@ Architectural facilities that promote loose coupling are the interfaces defining
 As the most common of components, there is data. A Message is the most basic abstraction that suffices for all interoperability between disprate components. This is the wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected endpoints/transports. For example, if a message is an email, then the header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various endpoints. We will focus more on metadata and metadata strategies later in this book. For now, lets take a look at what it means for a message to get through an Integration system.
 
 .A message composition diagram.
-image::{code}/techover/the-message.png[alt=The Message]
+image::{code}/techover/diagrams/eip/message.jpg[alt=The Message]
 
 ** DO's and Dont's **
 
-Messages shall contain just enough data to be useful within the boundry of such system which produced it. Additional inferences should be made 
-by downstream components which 'enrich' (see later) data as needed by further downstream components. This is because sometimes, not all data is needed at once. 
+Messages shall contain just enough data to be useful within the boundry of such system which produced it. Additional inferences should be made  by downstream components which 'enrich' (see later) data as needed by further downstream components. This is because sometimes, not all data is needed at once. 
 
 For example, take a User object. The User Object might contain just a username, and a small amount of domain-specific data ( such as home directory ).
+
 However, there is also additional information such as profile information - address, phone number, email, etc... - and authentication data - password and login - Not all data is needed at the same time! Thus it makes sense to only look-up such data whenever it is actually needed. Likewise, a message should contain just enough data to get to the next component in your system, and nothing more.
 
 Keep in mind, Integrations are going to support consumption of data specific to component's end-use scenarios such as login, state changes, comparison and so on. You will want to design your Integration for seperation of domain concerns as.
@@ -27,17 +27,23 @@ Keep in mind, Integrations are going to support consumption of data specific to 
 The Message Channel concept enables transmission of messages from producers to consumers. This constitues the "pipe" of our pipes-and-filters architecture. Consumers retrieve messages from a particular Message Channel, thus providing a convenient place for certain actions to be performed on the messages after it's producer has sent it to the channel, and before the consumer has received it.
 
 .A message channel diagram.
-image::{code}/techover/the-message-channel.png[alt=The Message Channel]
+image::{code}/techover/diagrams/eip/message-channel.jpg[alt=The Message Channel]
 
 Message Channels have 2 behaviors: "Point-to-point" and "Publish-Subscribe" that specify how consumers receive a message. The Point-to-Point channel specifies that no more than one consumer may receive a message sent to the channel. Publish-subscribe (also known as Pubsub) channels, will allow a 'fan-out' approach whereas any number of consumers may receive the message.
 
-Channels are the input/output components that make up what is essentially connective tissue around any endpoints. A Channel may or may not buffer messages sent across it. Buffering implies a 'queue' structure underneath the channel allowing the consumer to 'poll' or periodically check for additional messages. The advantage here is that a consumer may opt to consume as many messages as can be handled. This works well for point-to-point channels. On the other hand, in a pub-sub setting, it may not be desirable to store messages in the channel, but rather issue them as fast as possible. The Integration platform itself doesnt know how messages line up with channels; it is up to the developer to logically align channels with the endpoints that will receive messages. This is all to say that Channels are indeed the logical 'address' of a message-driven system. Because of this, it is only intuition that says channels are referenced with names like 'qa-mail-out' and 'qa-file-in' - basically these names by which the operator can control (by clearing, reloading or some other action) and ensure proper system-wide operation.
+Channels are the input/output components that make up what is essentially connective tissue around any endpoints. A Channel may or may not buffer messages sent across it. Buffering implies a 'queue' structure underneath the channel allowing the consumer to 'poll' or periodically check for additional messages. The advantage here is that a consumer may opt to consume as many messages as can be handled. This works well for point-to-point channels.
+
+On the other hand, in a pub-sub setting, it may not be desirable to store messages in the channel, but rather issue them as fast as possible. The Integration platform itself doesnt know how messages line up with channels; it is up to the developer to logically align channels with the endpoints that will receive messages. This is all to say that Channels are indeed the logical 'address' of a message-driven system. Because of this, it is only intuition that says channels are referenced with names like 'qa-mail-out' and 'qa-file-in' - basically these names by which the operator can control (by clearing, reloading or some other action) and ensure proper system-wide operation.
 
 We will discuss in depth the varieties of message channel implementations, but for now understand that channels provide the message-driven abstraction layer above transport to which a subscriber may participate.
 
 == Message Endpoints
 
-Spring Integration simplifies the composition of messaging based software. That is, because messaging is a means to connect heterogeneus systems together, the overall architecture of an Integration takes into focus the disparate domains in which each system is built on. Spring Integration gives a declarative approach to configuration in this setting, and allows you to "connect" the domain-specific code to the messaging infrastructure provided by Spring Integration. Thus, the components being connected to these messaging infrastructure are called messaging endpoints. The most important influence within this kind of architecture is the sperartion-of-concern between integration logic, and business logic. Basically, as with MVC, we dont rely on the actual server to the job, but usually a set of external domain-focus systems. Messaging makes getting data in and out of these domain focused systems not only intuitive but resiliant and predictable.
+Spring Integration simplifies the composition of messaging based software. That is, because messaging is a means to connect heterogeneus systems together, the overall architecture of an Integration takes into focus the disparate domains in which each system is built upon.
+
+Spring Integration gives a declarative approach to configuration in this setting, and allows you to "connect" the domain-specific code to the messaging infrastructure provided by Spring Integration. Thus, the components being connected to these messaging infrastructure are called messaging endpoints. The most important influence within this kind of architecture is the sperartion-of-concern between integration logic, and business logic. 
+
+As with MVC, we dont rely on the actual server to the job, but usually a set of external domain-focus systems. Messaging makes getting data in and out of these domain focused systems not only intuitive but resiliant and predictable.
 
 == Host of Endpoint Variants
 
@@ -48,14 +54,14 @@ The following list shows the main kinds of message endpoints supported in Spring
 A Transformer converts the message content or structure. Think of a user identity manager which turns a username/password pair into a User of that system. Similarly, a transformer can modify the message's header values.
 
 .Transformer
-image::{code}/techover/transformer.png[alt=Transformer]
+image::{code}/techover/diagrams/eip/transformer.jpg[alt=Transformer]
 
 === Filter
 
 Filters simply allows or disallows a message to pass through the channel. This implies a boolean test method that checks message state for determining conditions of acceptance. If the message is accepted, it goes along to the output channel. In the other case, a Filter may drop, or throw Exception.
 
 .Filter
-image::{code}/techover/filter.png[alt=Filter]
+image::{code}/techover/diagrams/eip/filter.jpg[alt=Filter]
 
 > TIP: Be careful not to confuse the generic use of “filter” within the pipes-and-filters architectural pattern with this specific endpoint type that selectively narrows down the messages flowing between two channels. The pipes-and-filters concept of a “filter” matches more closely with Spring Integration’s message endpoint: any component that can be connected to a message channel in order to send or receive messages.
 
@@ -64,40 +70,40 @@ image::{code}/techover/filter.png[alt=Filter]
 This component can determine which channel to send a particular message based on its content. Message router can be equated to a static output channel configured with a service activator or another endpoint capable of a 'reply' message.
 
 .Router
-image::{code}/techover/router.png[alt=Router]
+image::{code}/techover/diagrams/eip/router.jpg[alt=Router]
 
 === Splitter
 
 Splitters can break an incoming message into multiple messages and send them to the appropriate channel(s). This is typically used for decomposing messages into discreet elements consumable in the output channel. An example is turning a String into a series of Chars.
 
 .Splitter
-image::{code}/techover/splitter.png[alt=Splitter]
+image::{code}/techover/diagrams/eip/splitter.jpg[alt=Splitter]
 
 === Aggregator
 
 Like Splitter in reverse, this component combines multiple messages into one. An aggregator is more complex than a splitter and is often required to maintain state. In case aggregation reaches time limits - timeout - a strategy can be employed that determines how partial aggregates are handled.
 
 .Aggregator
-image::{code}/techover/aggregator.png[alt=Aggregator]
+image::{code}/techover/diagrams/eip/aggregator.jpg[alt=Aggregator]
 
 === Service activator
 
 The Service Activator is the interface between the message channel and a service instance, many times containing the application code for business logic. Service activators make 'reply' an option since each message can provide a 'Return Address' header in the absense of output channel. 
 
 .Service Activator
-image::{code}/techover/the-service-activator.png[alt=The Service Activator]
+image::{code}/techover/diagrams/eip/service-activator.jpg[alt=The Service Activator]
 
 === Channel adapter
 
 Is used to connect the message channel to another system or transport. Usually a Channel Adapter makes the leap between protocol boundaries and does mapping to bind the two sides. This for example can be something like converting an HTTP request to SMTP, or maybe Files to JMS message. Spring Integration provides a host of Channel Adapter implementations for popular technologies. This endpoint also comes in 2 flavours - Inbound and Outbound.
 
 .Inbound Adapter
-image::{code}/techover/inbound-channel-adapter.png[alt=Inbound Channel Adapter]
+image::{code}/techover/diagrams/eip/inbound-channel-adapter.jpg[alt=Inbound Channel Adapter]
 
 The Inbound adapter may be a static resource such as file system. In this case, new file arrivals can trigger the adapter to Stringify and send file contents as a Message on the programmed output channels.
 
 .Outbound Adapter
-image::{code}/techover/outbound-channel-adapter.png[alt=Outbound Channel Adapter]
+image::{code}/techover/diagrams/eip/outbound-channel-adapter.jpg[alt=Outbound Channel Adapter]
 
 The direction of an outbound message flow is opposite of Inbound. Outbound adapters will typically consume a message, then transform it into a protocol the adapter is binding to. For example a message may arrive with filename as a header property, so that the adapter writes the message payload as a file to the filesystem.
 

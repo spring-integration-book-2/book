@@ -143,7 +143,7 @@ include::{code}/channels/src/main/sample/MessageHandler.java[]
 
 === Publish-SubScribe Channel
 
-The `PublishSubscribeChannel` implementation is the basic publish-subscribe (PubSub) channel implementation. This message channel broadcasts any sent messages to all of the channel subscribers. In addition, the messages are pushed to the consumers instead of the consumers polling for the messages. Rather than provide a `receive()` method, the publish-subscribe channel pushes it's messages directly to any `MessageHandler`s.
+The `PublishSubscribeChannel` implementation is the basic publish-subscribe (PubSub) channel implementation. This message channel broadcasts any sent messages to all of the channel subscribers. In addition, the messages are pushed to the consumers instead of the consumers polling for the messages. Rather than provide a `receive()` method, the publish-subscribe channel pushes it's messages directly to any downstream `MessageHandler`.
 The channel has a behaviour of sending messages to subscribers only when a `minSubscribers` threshold (0 or more) is set.
 
 .PublishSubscribe Channel Class Diagram
@@ -195,7 +195,7 @@ image::{code}/channels/diagrams/class/rendezvous-channel.jpg[alt=Rendezvous Chan
 One particularly interesting use case for `RendezvousChannel` is request-reply.  By constructing a RendezvousChannel and setting it's ID as a 'replyChannel' message header on a message being sent, the sender can call `receive` in order to block (and possibly timeout) while waiting for a reply. Spring Integration makes use of this pattern in order to apply request-reply semantics to some components.
 
 .Rendezvous RequestReply Diagram
-image::{code}/channels/diagrams/eip/rendezvous-request-reply.jpg[alt=Rendezvous Request Reply Diagram,scaledwidth=40%]
+image::{code}/channels/diagrams/eip/rendezvous-channel.jpg[alt=Rendezvous Request Reply Diagram,scaledwidth=40%]
 
 ==== DirectChannel
 
@@ -302,7 +302,7 @@ image::{code}/channels/diagrams/class/flux-message-channel.jpg[alt=Flux Message 
 
 == Channel Interceptors
 
-Spring Integration provides the ability to intercept messages at specific stages around a `MessageChannel`'s send and receive operations by way of the `org.springframework.messaging.support.ChannelInterceptor` interface.
+Spring Integration provides the ability to intercept messages at specific stages around the  `MessageChannel` send and receive operations by way of the `org.springframework.messaging.support.ChannelInterceptor` interface.
 
 The `org.springframework.messaging.support.InterceptableChannel` interface provides management methods (add, remove) for a `MessageChannel` to implement, while the `ChannelInterceptor` itself does the work at various interception points. 
 
