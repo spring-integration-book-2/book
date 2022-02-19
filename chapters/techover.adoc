@@ -16,7 +16,7 @@ Furthermore, the composition of message-headers is really up to the ultimate use
 We will focus more on metadata and metadata strategies later in this book. For now, lets take a look at what it means for a message to get through an Integration system.
 
 .A message composition diagram.
-image::{code}/techover/diagrams/eip/message.jpg[alt=The Message]
+image::{code}/techover/diagrams/eip/message.jpg[alt=The Message,scaledwidth=40%]
 
 ** DO's and Dont's **
 
