@@ -92,7 +92,7 @@ image::{code}/techover/diagrams/eip/message-splitter.jpg[alt=Splitter,scaledwidt
 Like Splitter in reverse, this component combines multiple messages into one. An aggregator is more complex than a splitter and is often required to maintain state. In case aggregation reaches time limits - timeout - a strategy can be employed that determines how partial aggregates are handled.
 
 .Aggregator
-image::{code}/techover/diagrams/eip/aggregator.jpg[alt=Aggregator,scaledwidth=40%]
+image::{code}/techover/diagrams/eip/message-aggregator.jpg[alt=Aggregator,scaledwidth=40%]
 
 === Service activator
 
