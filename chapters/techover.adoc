@@ -1,13 +1,19 @@
 [[techover]]
-= Tech Overview
+= Technical Overview
 
-Spring Integration provides an intuitive programming model for complex enterprise integration strategies. These Integration strategies are adopted in asynchronous, message-driven style while being loosly coupled for modularity and testability. The goal here, much like Spring Framework itself, enforces separation of concerns between business and integration logic. Thus adoption among existing Spring users means they can rely on the same style and abstract nature that help to promote reusability and portability across projects. Spring Integration's design is indeed a blend of both these common patterns within Spring, and the patterns described in Enterprise Integration Patterns, by Gregor Hohpe and Bobby Woolf (Addison Wesley, 2004).
+Spring Integration provides an intuitive programming model for complex Enterprise Application Integration strategies. These Integration strategies are adopted in asynchronous, message-driven style while being loosly coupled for modularity and testability. The goal here, much like Spring Framework itself, enforces separation of concerns between business and integration logic.
 
-Architectural facilities that promote loose coupling are the interfaces defining the contracts between layers of abstraction. For example, messaging systems typically follow the similarly abstract "pipes-and-filters" model.  Whereas "filters" represent components that produce or consume messages, whereas the "pipes" represent components that transport messages between filters.  Thus the underlaying infrastructure supporting "pipes" are programmed as a set of interfaces having 'input/output', 'read/write' semantics. Similarly, the "filters" must be programmed in a way that issues 'input/output' semantic over an application's service layer interfaces in much the same way a web or socket tier would.
+Adoption among existing Spring users means they can rely on the same style and abstract nature that help to promote reusability and portability across projects. Spring Integration's design is indeed a blend of both these common patterns within Spring, and the patterns described in Enterprise Integration Patterns, by Gregor Hohpe and Bobby Woolf (Addison Wesley, 2004).
+
+Architectural facilities that promote loose coupling are the interfaces defining the contracts between layers of abstraction. For example, messaging systems typically follow the similarly abstract "pipes-and-filters" model.  Whereas "filters" represent components that produce or consume messages, the "pipes" represent components that transport messages between filters.  Thus the underlaying infrastructure supporting "pipes" are programmed as a set of interfaces having 'input/output', 'read/write' semantics. Similarly, the "filters" must be programmed in a way that issues 'input/output' semantic over an application's service layer interfaces in much the same way a web or socket tier would.
 
 == Message
 
-As the most common of components, there is data. A Message is the most basic abstraction that suffices for all interoperability between disprate components. This is the wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected endpoints/transports. For example, if a message is an email, then the header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger. Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various endpoints. We will focus more on metadata and metadata strategies later in this book. For now, lets take a look at what it means for a message to get through an Integration system.
+As the most common of components, there is data. A Message is the most basic abstraction that suffices for all interoperability between disprate components. This is the wrapper for both any object which consists of an application payload, and it's headers. Headers are used to communicate intention between connected endpoints/transports. For example, if a message is an email, then the header will contain the properties (from, to, subject, etc..) that are used in the sending of the message at the mail exchanger.
+
+Furthermore, the composition of message-headers is really up to the ultimate use of the application; developers can store any arbitrary key/value pairs there. One may even store a userId in the header as a way to authenticate a message's route through various endpoints. 
+
+We will focus more on metadata and metadata strategies later in this book. For now, lets take a look at what it means for a message to get through an Integration system.
 
 .A message composition diagram.
 image::{code}/techover/diagrams/eip/message.jpg[alt=The Message]
@@ -16,7 +22,7 @@ image::{code}/techover/diagrams/eip/message.jpg[alt=The Message]
 
 Messages shall contain just enough data to be useful within the boundry of such system which produced it. Additional inferences should be made  by downstream components which 'enrich' (see later) data as needed by further downstream components. This is because sometimes, not all data is needed at once. 
 
-For example, take a User object. The User Object might contain just a username, and a small amount of domain-specific data ( such as home directory ).
+For example, take a User object. The User object might contain just a username, and a small amount of domain-specific data ( such as home directory ).
 
 However, there is also additional information such as profile information - address, phone number, email, etc... - and authentication data - password and login - Not all data is needed at the same time! Thus it makes sense to only look-up such data whenever it is actually needed. Likewise, a message should contain just enough data to get to the next component in your system, and nothing more.
 
@@ -27,7 +33,7 @@ Keep in mind, Integrations are going to support consumption of data specific to 
 The Message Channel concept enables transmission of messages from producers to consumers. This constitues the "pipe" of our pipes-and-filters architecture. Consumers retrieve messages from a particular Message Channel, thus providing a convenient place for certain actions to be performed on the messages after it's producer has sent it to the channel, and before the consumer has received it.
 
 .A message channel diagram.
-image::{code}/techover/diagrams/eip/message-channel.jpg[alt=The Message Channel]
+image::{code}/techover/diagrams/eip/message-channel.jpg[alt=The Message Channel,scaledwidth=40%]
 
 Message Channels have 2 behaviors: "Point-to-point" and "Publish-Subscribe" that specify how consumers receive a message. The Point-to-Point channel specifies that no more than one consumer may receive a message sent to the channel. Publish-subscribe (also known as Pubsub) channels, will allow a 'fan-out' approach whereas any number of consumers may receive the message.
 
@@ -47,63 +53,65 @@ As with MVC, we dont rely on the actual server to the job, but usually a set of 
 
 == Host of Endpoint Variants
 
-The following list shows the main kinds of message endpoints supported in Spring Integration apps:
+In the following secions, we will overview the main kinds of message endpoints supported and thereby implemented by Spring Integration.
 
 === Transformer
 
 A Transformer converts the message content or structure. Think of a user identity manager which turns a username/password pair into a User of that system. Similarly, a transformer can modify the message's header values.
 
 .Transformer
-image::{code}/techover/diagrams/eip/transformer.jpg[alt=Transformer]
+image::{code}/techover/diagrams/eip/message-transformer.jpg[alt=Transformer,scaledwidth=40%]
 
 === Filter
 
 Filters simply allows or disallows a message to pass through the channel. This implies a boolean test method that checks message state for determining conditions of acceptance. If the message is accepted, it goes along to the output channel. In the other case, a Filter may drop, or throw Exception.
 
 .Filter
-image::{code}/techover/diagrams/eip/filter.jpg[alt=Filter]
+image::{code}/techover/diagrams/eip/message-filter.jpg[alt=Filter,scaledwidth=40%]
 
 > TIP: Be careful not to confuse the generic use of “filter” within the pipes-and-filters architectural pattern with this specific endpoint type that selectively narrows down the messages flowing between two channels. The pipes-and-filters concept of a “filter” matches more closely with Spring Integration’s message endpoint: any component that can be connected to a message channel in order to send or receive messages.
 
 === Router 
 
-This component can determine which channel to send a particular message based on its content. Message router can be equated to a static output channel configured with a service activator or another endpoint capable of a 'reply' message.
+This component can determine which channel to send a particular message based on headers and or payload. Message routers do not alter the properites of a message, as it is only concerned with the message destination. 
+
+Message routers can be equated to a static output channel configured with a service activator or another endpoint capable of a 'reply' message.
 
 .Router
-image::{code}/techover/diagrams/eip/router.jpg[alt=Router]
+image::{code}/techover/diagrams/eip/message-router.jpg[alt=Router,scaledwidth=40%]
 
 === Splitter
 
 Splitters can break an incoming message into multiple messages and send them to the appropriate channel(s). This is typically used for decomposing messages into discreet elements consumable in the output channel. An example is turning a String into a series of Chars.
 
 .Splitter
-image::{code}/techover/diagrams/eip/splitter.jpg[alt=Splitter]
+image::{code}/techover/diagrams/eip/message-splitter.jpg[alt=Splitter,scaledwidth=40%]
 
 === Aggregator
 
 Like Splitter in reverse, this component combines multiple messages into one. An aggregator is more complex than a splitter and is often required to maintain state. In case aggregation reaches time limits - timeout - a strategy can be employed that determines how partial aggregates are handled.
 
 .Aggregator
-image::{code}/techover/diagrams/eip/aggregator.jpg[alt=Aggregator]
+image::{code}/techover/diagrams/eip/aggregator.jpg[alt=Aggregator,scaledwidth=40%]
 
 === Service activator
 
 The Service Activator is the interface between the message channel and a service instance, many times containing the application code for business logic. Service activators make 'reply' an option since each message can provide a 'Return Address' header in the absense of output channel. 
 
 .Service Activator
-image::{code}/techover/diagrams/eip/service-activator.jpg[alt=The Service Activator]
+image::{code}/techover/diagrams/eip/service-activator.jpg[alt=The Service Activator,scaledwidth=40%]
 
 === Channel adapter
 
 Is used to connect the message channel to another system or transport. Usually a Channel Adapter makes the leap between protocol boundaries and does mapping to bind the two sides. This for example can be something like converting an HTTP request to SMTP, or maybe Files to JMS message. Spring Integration provides a host of Channel Adapter implementations for popular technologies. This endpoint also comes in 2 flavours - Inbound and Outbound.
 
 .Inbound Adapter
-image::{code}/techover/diagrams/eip/inbound-channel-adapter.jpg[alt=Inbound Channel Adapter]
+image::{code}/techover/diagrams/eip/inbound-channel-adapter.jpg[alt=Inbound Channel Adapter,scaledwidth=40%]
 
 The Inbound adapter may be a static resource such as file system. In this case, new file arrivals can trigger the adapter to Stringify and send file contents as a Message on the programmed output channels.
 
 .Outbound Adapter
-image::{code}/techover/diagrams/eip/outbound-channel-adapter.jpg[alt=Outbound Channel Adapter]
+image::{code}/techover/diagrams/eip/outbound-channel-adapter.jpg[alt=Outbound Channel Adapter,scaledwidth=40%]
 
 The direction of an outbound message flow is opposite of Inbound. Outbound adapters will typically consume a message, then transform it into a protocol the adapter is binding to. For example a message may arrive with filename as a header property, so that the adapter writes the message payload as a file to the filesystem.
 
