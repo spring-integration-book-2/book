@@ -329,64 +329,64 @@ Because of the nature of channels having specific send/receive logic, the differ
 |Y
 |Y
 |Y
-|M
-|M
+|Y
+|Y
 
 |PriorityChannel
 |Y
 |Y
 |Y
 |Y
-|M
-|M
+|Y
+|N
 
 |RendezvousChannel
 |Y
 |Y
 |Y
 |Y
-|M
-|M
+|Y
+|Y
 
 |DirectChannel
 |Y
 |N
 |Y
 |N
-|M
-|M
+|Y
+|Y
 
 |ExecutorChannel
 |Y
 |N
 |Y
 |N
-|M
-|M
+|Y
+|Y
 
 |NullChannel
 |Y
 |Y
 |Y
 |Y
-|M
-|M
+|Y
+|Y
 
 |PublishSubscribeChannel
 |Y
 |N
 |Y
 |N
-|M
-|M
+|Y
+|Y
 
 |FluxMessageChannel
 |Y
 |Y
 |Y
 |Y
-|M
-|M
+|Y
+|Y
 |===
 
 The `afterSendCompletion()` and `afterReceiveCompletion()` methods always get invoked regardless of successful or abnormal completion. It is a useful way to express guaranteed logic after send/receive, as the other methods will not be invoked in case of an error.
@@ -406,7 +406,13 @@ include::{code}/channels/src/main/java/tdg2si/channels/GlobalInterceptors.java[]
 
 == MessagingTemplate
 
-Spring Integration provides `MessagingTemplate` as a very easy way to integrate a messaging system into applications. It supports common message channel operations, such as send and receive. `MessagingTemplate` can support transactions by accepting a `PlatformTransactionManager`. Additionally, The `MessagingTemplate` can build Spring Integration `Message` instances.
+Spring Integration provides `MessagingTemplate` as a very easy way to integrate a messaging system into applications. It supports common message channel operations, such as send and receive in both synchronous and asynchronous configurations. `MessagingTemplate` can also support transactions by accepting a `PlatformTransactionManager`. 
+
+.MessageTemplateCaller.java
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdg2si/channels/MessageTemplateCaller.java[]
+----
 
 == Configuring Message Channels
 
