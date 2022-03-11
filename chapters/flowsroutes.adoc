@@ -1,12 +1,11 @@
 [[flows]]
 = Message Flows
 
-Messages usually move in a system in a straight line, moving from one endpoint to the next. On
+Messages usually move within a system in a straight line, moving from one endpoint to the next. On
 occasion, however, a little bit of flexibility is required; a message might need to visit two different
 endpoints at the same time, or it might need to be conditionally sent to one and not another. The
 progression of messages through a system is like the progression of a steady stream; it takes skill and
 ingenuity (and care!) to safely route the flow.
-
 
 In Spring Integration, a message router decides what channel or channels should receive the
 message next. This decision is based on the message’s content and/or metadata contained in the
@@ -17,14 +16,9 @@ splitter; it combines multiple messages into a single message. A resequencer wor
 does not process the messages in any way; it simply releases the messages to downstream components
 in a particular order. These are the different components available for controlling message flows in
 Spring Integration. They will all be discussed in this chapter. This chapter will also discuss simplifying
-the configuration using a message handler chain.
-Messaging is inherently stateless. 
+the configuration using a message handler chain.Messaging is inherently stateless. 
 
-Spring Integration lets you work with the allusion of state by
-propagating headers from endpoint to endpoint. This lets you make local decisions, to act in the
-integration flow with the knowledge of the state of any given message at any given time, but it does not
-afford you the big-picture view of a directed process. This is where a workflow steps in. Workflow and
-how to use a workflow engine with Spring Integration is the last topic in this chapter.
+Spring Integration lets you work with the allusion of state by propagating headers from endpoint to endpoint. This lets you make local decisions, to act in the integration flow with the knowledge of the state of any given message at any given time, but it does not afford you the big-picture view of a directed process. This is where a workflow steps in. Workflow and how to use a workflow engine with Spring Integration is the last topic in this chapter.
 
 == Message Flow Patterns
 
@@ -33,12 +27,12 @@ metadata. For example, a stock market data feed system will typically handle a f
 market instruments whose routes are negotiated in terms of market sector, equity type, and region. This
 is where a message router can be leveraged. Filtering provides a way to gate the flow of messages based
 on some condition, which can be very useful as well. This is similar to TCP/IP where firewalls can
-provide deep-packet inspection to selectively meter traffic.
+provide TCP/IP header inspection to selectively meter traffic.
 
 Enterprise applications with many discrete datasets may need to process a large amount of
 information where sending an entire set of data to one location for processing is inefficient.
 Partitionable data can be efficiently processed by splitting it and processing the pieces.
-Let’s look at some of the common types of routing.
+Let’s look at some of the common types of flow controls.
 
 === Router
 
@@ -89,9 +83,10 @@ Let’s look at how Spring Integration implements the common message flow patter
 provided for each of the patterns. A known list of channels may be specified for a router where the
 incoming Message<T> may be passed. This means that the process flow may be changed conditionally,
 and it also means that a message may be forwarded to as many (or as few) channels as desired. The
-org.springframework.integration.router package provides several convenient router implementations,
+`org.springframework.integration.router` package provides several convenient router implementations,
 such as payload type–based routing PayloadTypeRouter and routing to a list of channels
-RecipientListRouter.
+`RecipientListRouter`.
+
 For example, imagine a processing pipeline in which investment instruments are routed depending
 on their type, such as stocks or bonds. When each instrument is finally processed, specific fields may get
 added that are relevant to that instrument type. The domain object that represents each investment is
@@ -99,7 +94,7 @@ shown in the following snippet.
 
 [source,java,indent=0]
 ----
-include::{code}/flowsroutes/src/main/java/tdgsi/ChatMessage.java[]
+include::{code}/flowsroutes/src/main/java/tdgsi/flows/InvenstmentClass.java[]
 ----
 
 For this sample, lets also create a utility that describes concrete instances of chat messages that may 

@@ -408,11 +408,17 @@ include::{code}/channels/src/main/java/tdg2si/channels/GlobalInterceptors.java[]
 
 Spring Integration provides `MessagingTemplate` as a very easy way to integrate a messaging system into applications. It supports common message channel operations, such as send and receive in both synchronous and asynchronous configurations. `MessagingTemplate` can also support transactions by accepting a `PlatformTransactionManager`. 
 
+An example for making a callout to an integration flow using `MessageTemplate` is shown below:
+
 .MessageTemplateCaller.java
 [source,java,indent=0]
 ----
 include::{code}/channels/src/main/java/tdg2si/channels/MessageTemplateCaller.java[]
 ----
+<1> MessageTemplate is the DSL for seting up a typical calling of an integration flow
+<2> Use the MessageBuilder to construct a message to send to the flow
+<3> Additional properties such as a Transactionmanager is supported by the DSL
+<4> When performing Asynchronous flows, follow usual asynch call path such as  blocking `get()` or letting the executor handle the interaction.
 
 == Configuring Message Channels
 

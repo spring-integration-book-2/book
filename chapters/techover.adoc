@@ -26,7 +26,7 @@ For example, take a User object. The User object might contain just a username, 
 
 However, there is also additional information such as profile information - address, phone number, email, etc... - and authentication data - password and login - Not all data is needed at the same time! Thus it makes sense to only look-up such data whenever it is actually needed. Likewise, a message should contain just enough data to get to the next component in your system, and nothing more.
 
-Keep in mind, Integrations are going to support consumption of data specific to component's end-use scenarios such as login, state changes, comparison and so on. You will want to design your Integration for seperation of domain concerns as.
+Keep in mind, Integrations are going to support consumption of data specific to component's end-use scenarios such as login, state changes, comparison and so on. You will want to design your  Integration for seperation of domain concerns as.
 
 == Message Channel
 
@@ -53,7 +53,7 @@ As with MVC, we dont rely on the actual server to the job, but usually a set of 
 
 == Host of Endpoint Variants
 
-In the following secions, we will overview the main kinds of message endpoints supported and thereby implemented by Spring Integration.
+In the following secions, we will overview the main kinds of message endpoints supported and thereby implemented by Spring Integration. Keep in mind that these components are specified in Enterprise Integration Patterns and are re-usable from a lingo perspective across other Integration libraries.
 
 === Transformer
 
@@ -119,8 +119,118 @@ The direction of an outbound message flow is opposite of Inbound. Outbound adapt
 
 So, what exactly does it mean to compose and utilize Spring Integration's components in practice? How does the Spring Framework wire these dependencies together to create a cohesive Integration. In the next few chapters, we are going to take a look at what this means. We'll see how Spring aggregates configuration metadata from annotations and beans exposed to the ApplicationContext. Then we will make the leap to Framework DSL's that will simplify inplementation the necessary pieces.
 
+=== Integration DSL
+
+Spring Integration provides a number of out of the box  Domain Specific Languages that enable fluent style programmatic configuration of enterprise integration flows. This enhances the coorelation between business logic and integration flow setup that often becomes riddled with indirection, thus needing to flip back-and-forth between some other dialect such as XML or YaML. The amount of friction that brings is only up to how well engrianed such dialetcs may be established within an orginatization. However, with the shifting of time comes movement of dialects thus YaML begats XML begats properties, etc... Keeping configuration and logic in a contiguous unit enables greater understandability and establishes reason and utility throughout the ecosystem.
+
+Such is the flexability that the JavaDSL brings to Spring Integration. When configuring an integration flow, you will need to define components that support other components ad-infinitum. But because the Spring Integration is complete and holistic, you will interact very little with support components as they are configured behind-the-scenes when necessary, and exposed directly to the developer by definition of configuration.
+
+The following example contrasts DSL configuration with XML variant, then we will look at the 'manual' Java Bean configuration over DSL.
+
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdg2si/channels/FlowConfigurationExample.java[]
+----
+
+Contrast with the XML variant
+
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/resources/flow-configuration.xml[]
+----
+
+And it's Java Beans with Annotation variant
+
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdg2si/channels/FlowConfigurationJavaBeans.java[]
+----
+
+From here we will take a look at the support classes given by Spring Integration to allow fluent-DSL configuration. Spring Integration DSL's utilize the `builder` pattern for providing fluent, EIP-method chains. The `org.springframework.integration.dsl` package utilizes a number of `IntegrationComponentSpec` imlementations that give us the concrete details of configuring each Integration pattern.
+
+
+The following chart describes a number of high-level integration DSL classes that behave in a way that is consistent to the class name it describes. For example, `MessageChannels` for configuring a message channel, will expose a builder factory that has methods receiving parameters specific to any number of message channel implementations.
+
+
+.Common Spring Integration DSL's
+[cols="1,1"]
+|===
+| DSL Class
+| Description
+
+| org.springintegration.dsl.MessageChannels
+| Create Message Channel Definitions
+
+| org.springframework.messaging.support.MessageBuilder
+| Build Messages
+
+| org.springframework.integration.core.MessagingTemplate
+| Interact with Message Channels by sending and receiving messages
+
+| org.springframework.integration.dsl.Pollers
+| Build PollerMetadata for `AbstractPollingEndpoint` implementations
+
+| org.springframewok.dsl.IntegrationFlows
+| Define an Enterprise Integration workflow given channels, adapters and endpoints
+
+|===
+
+In the following sections, we will look at a few key DSL classes, as well as the main entrant `IntegrationFlowBuilder` used to construct every Integration component needed to achieve a fully functional flow.
+
+=== MessageChannels
+
+To configure message channels, you will use the `org.springintegration.dsl.MessageChannels` DSL library to generate the specifications , then expose them as `@Bean` definitions, or use them directly. Keep in mind that Channels that are not registered on the current application context will not be seen by any Integration-specific components nor will they get found by look-up methods.
+
+An example of configuring a message channel with specifics given at runtime is seen below:
+
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdg2si/techover/MessageChannelConfigs.java[]
+----
+
+=== MessageBuilder
+
+To send messages through the system ad-hoc, you need to construct an instance of `Message`, but also configure it's payload, headers, and any Integration-specific header features such as reply channel. Thus, the `org.springframework.messaging.support.MessageBuilder` comes in to make this straight-forward. 
+
+Building messages has no condition on what state that the application is in, however when it comes to a message routing through a system, all other components must be visible for the message to arrive at it's destination properly.
+
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdg2si/channels/MessageBuilderExample.java[]
+----
+
+=== MessagingTemplate
+
+Use the `MessagingTemplate` to send a message into an integration flow, receive it's output as a result of it kicking off the internal operations defined by your flow. In contrast, you can send a message directly into a Channel by using it's `send()` method and registering a `MessageHandler` to receive it's output. The latter being more complicatd, but also takes longer to make cross-cutting changes to integration flows.
+ 
+You most likely wont be handling messages directly to/from flows, so it not likely that it will be invoked. However, the templates make good for testing, and performing some basic domain-joining (aka transformation) work in the beginning. The messaging template comes in a two flavours depending on the way that you want your calling application to handle message consumption and reception. Ordinarily, `MessagingTemplate` will block until timeout is met, or an exception is raised. Use the `org.springframework.integration.core.AsyncMessageTemplate` to direct messages into flows - it delegates to a `Executor` - and you have to manage the returning `java.util.concurrent.Future` that can be handled later.
+
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdg2si/channels/MessagingTemplateExample.java[]
+----
+
+=== Pollers
+
+The `PollerSpec` defines parameters and methods for building `PollerMetadata` that specifies the behaviour of a `Poller` against a `PollingMessageSource` or `SourcePollingChannelAdapter`.
+
+This DSL gets used to configure a real `Poller` and thus apply specific properties such as poll rate, scheduler, error channels, retry strategies and more.
+
+[source,java,indent=0]
+----
+include::{code}/channels/src/main/java/tdg2si/techover/PollerSpecExample.java[]
+----
+
+
+=== IntegrationFlows
+
+The central Spring Integration DSL API class is the `org.springframework.integration.dsl.IntegrationFlows` class. This class has necessary methods that allow defining any Integration pattern such as filters, routers, channels, handlers, and more. To understand this in depth, the graph below describes some of the major collaborators that interact with the output for builders of various Integration instances to be used with `IntegrationFlow`.
+
+.Service Activator
+image::{code}/techover/diagrams/class/integration-flow-collaborators.jpg[alt=The Service Activator,scaledwidth=40%]
+
 == Summary
 
-Each of these message endpoints encapsulate the semantics of the Integration pattern it is named after, and will be reviewed in greater detail LATER IN THIS BOOK.
+Each of these message endpoints encapsulate the semantics of the Integration pattern it is named after, and will be reviewed in greater detail LATER IN THIS BOOK. Furthermore, for configuration side of things, we have a fluent DSL to make customizing our integration flows as easy as possible. The XML support is still available, but due to it's verbocity, we will only use it when necessary (for example... ). The Spring Integration framework indeed, lets us configure and reuse messaging components with ease and without fuss.
 
 In the next chapter, we will tackle the vital configuration aspects  that help us assemble a functional Integration-style application. Later in the book, we will dive into the concrete implementation details for each of the listed components. Using Spring Boot and Spring Integration together has never been easy.

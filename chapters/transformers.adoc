@@ -11,11 +11,13 @@ and system B might expect an XML-encoded record or some other serialization. An 
 should be able to adapt messages as required by consumers. Care should be taken that data is of as high
 fidelity as possible when moving from system to system. To support an extensible framework for data
 transformation, integration platforms support transformation.
+
 A message used to support communication between the integration endpoints typically consists of
 two parts: the payload, which is the actual data being sent, and the header, which is used for information
 supporting the housekeeping tasks or service support required for the messaging service. In addition to
 providing support for transforming the message payload, there is often a need to add header data—to
 enrich it with—metadata required to support processing by downstream components.
+
 Transformation is ideal when adapting data from one system to another, usually when the
 interchange is conceptually common, but different with regard to implementations among the multiple
 systems. On a small scale, this approach works fine: two transformations are required for a single,
@@ -27,6 +29,7 @@ quadratic growth. A common way to reduce this complexity is to have a central no
 communication on behalf of all the other nodes; all nodes need only to be adapted to send messages to,
 and receive messages from, this central node. The central node in turn routes to all other nodes. This is
 where the canonical data model pattern is most effective.
+
 For those coming to Spring Integration from other products, the fact that Spring Integration itself
 doesn’t mandate a canonical data model might be surprising. Spring Integration makes no assumptions
 about how messages travel inside the framework. A message might not ever leave the JVM, so there is no
@@ -43,8 +46,7 @@ transformers, and the ability to write your own, to meet these requirements.
 When describing message shapes between systems, there seems to be specific fields or properties supported
 by majority consuming servies. Conversely, there are also fields which may not make sense to some services. This 
 disparity is the reason why we would quantify messages by their shared relationship within a given system. 
-Therefore, a canonical data model is a data structure that is agreed upon or contracted to be used for passing an object 
-- such as a user - across an enterprise workflow. 
+Therefore, a canonical data model is a data structure that is agreed upon or contracted to be used for passing an object - such as a user - across an enterprise workflow. 
 
 In the representation shown below, various representations of a user are transformed into the canonical model.
 Thus, all interested services will be able to communicate, and perform their desired tasks since all are using
